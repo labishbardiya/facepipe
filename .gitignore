@@ -36,8 +36,8 @@ data/
 *.pkl
 
 # Evaluation datasets
-evaluation/datasets/
-!evaluation/datasets/.gitkeep
+facepipe/evaluation/datasets/
+!facepipe/evaluation/datasets/.gitkeep
 
 # Logs
 logs/
