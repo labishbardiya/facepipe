@@ -1,0 +1,84 @@
+# ============================================================
+# Default configuration values
+# ============================================================
+# These are loaded by Pydantic Settings and can be overridden
+# by environment variables (prefix: FR_) or .env file.
+
+detection:
+  size: 640
+  threshold: 0.5
+
+quality:
+  blur_threshold: 100.0
+  pose_max_yaw: 30.0
+  pose_max_pitch: 25.0
+  illumination_min: 40.0
+  illumination_max: 220.0
+  min_face_size: 0.015
+  enrollment_threshold: 0.65
+  recognition_threshold: 0.45
+
+deepfake:
+  enabled: true
+  threshold: 0.5
+
+antispoof:
+  security_level: MEDIUM
+  lbp_threshold: 0.6
+  fft_threshold: 0.5
+
+recognition:
+  model: adaface
+  embedding_dim: 512
+
+search:
+  m: 32
+  ef_construction: 200
+  ef_search: 64
+
+openset:
+  recognition_threshold: 0.4
+  margin_threshold: 0.05
+  top_k: 5
+
+clustering:
+  min_clusters: 2
+  max_clusters: 8
+  merge_threshold: 0.85
+  new_cluster_threshold: 0.65
+
+tracking:
+  buffer: 30
+  match_threshold: 0.7
+  re_recognize_interval: 30
+  high_det_threshold: 0.6
+  low_det_threshold: 0.1
+
+active_learning:
+  auto_add_threshold: 0.90
+  verify_threshold: 0.55
+  max_auto_adds_per_hour: 10
+  novelty_threshold: 0.3
+
+fusion:
+  security_level: STANDARD
+  weight_recognition: 0.35
+  weight_detection: 0.05
+  weight_quality: 0.10
+  weight_liveness: 0.15
+  weight_tracking: 0.10
+  weight_openset_margin: 0.15
+  weight_deepfake: 0.10
+  threshold_standard: 0.50
+  threshold_elevated: 0.65
+  threshold_maximum: 0.80
+
+storage:
+  image_retention_hours: 0
+  event_retention_days: 90
+
+api:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 4
+  rate_limit: 100

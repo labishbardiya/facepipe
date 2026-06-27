@@ -1,0 +1,1 @@
+"""Core recognition pipeline package."""
