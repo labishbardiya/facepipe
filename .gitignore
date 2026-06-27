@@ -60,3 +60,6 @@ htmlcov/
 results*.json
 failure_analysis*.json
 site/
+
+# Hugging Face Space
+FacePipe-Demo/
