@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment
+.env
+*.env.local
+
+# Models (large binary weights)
+models/*.onnx
+models/*.pth
+models/*.pt
+models/*.bin
+!models/.gitkeep
+
+# Data
+db/
+data/
+*.index
+*.pkl
+
+# Evaluation datasets
+evaluation/datasets/
+!evaluation/datasets/.gitkeep
+
+# Logs
+logs/
+*.log
+
+# Docker
+.docker/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# Benchmark results (local runs)
+results*.json
+failure_analysis*.json

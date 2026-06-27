@@ -1,0 +1,131 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "facepipe"
+version = "2.1.0"
+description = "Production-ready face recognition pipeline. Detection, quality, liveness, deepfake, recognition, search, tracking, and fusion — all integrated."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Labish Bardiya"},
+]
+keywords = [
+    "face-recognition",
+    "facial-recognition",
+    "anti-spoofing",
+    "liveness-detection",
+    "deepfake-detection",
+    "arcface",
+    "adaface",
+    "insightface",
+    "faiss",
+    "computer-vision",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+dependencies = [
+    # --- ML / Vision ---
+    "insightface>=0.7.3",
+    "onnxruntime>=1.16.0",
+    "opencv-python>=4.8.0",
+    "numpy>=1.24.0",
+
+    # --- Vector Search ---
+    "faiss-cpu>=1.7.4",
+
+    # --- API ---
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.27.0",
+    "python-multipart>=0.0.6",
+
+    # --- Configuration ---
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    "pyyaml>=6.0",
+
+    # --- Storage & Security ---
+    "cryptography>=42.0.0",
+    "msgpack>=1.0.0",
+
+    # --- Observability ---
+    "structlog>=24.1.0",
+    "prometheus-client>=0.20.0",
+
+    # --- Utilities ---
+    "scikit-learn>=1.3.0",
+    "scipy>=1.11.0",
+    "pillow>=10.0.0",
+    "ulid-py>=1.1.0",
+    "scikit-image>=0.22.0",
+]
+
+[project.optional-dependencies]
+gpu = [
+    "onnxruntime-gpu>=1.16.0",
+    "faiss-gpu>=1.7.4",
+]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.23.0",
+    "httpx>=0.27.0",
+    "mypy>=1.8.0",
+    "ruff>=0.3.0",
+]
+demo = [
+    "gradio>=4.0.0",
+]
+benchmark = [
+    "matplotlib>=3.8.0",
+    "tabulate>=0.9.0",
+]
+
+[project.scripts]
+facepipe = "facepipe.entrypoints.cli:main"
+facepipe-server = "facepipe.entrypoints.server:start"
+
+[project.urls]
+Homepage = "https://github.com/labishbardiya/facepipe"
+Documentation = "https://github.com/labishbardiya/facepipe#readme"
+Repository = "https://github.com/labishbardiya/facepipe"
+Issues = "https://github.com/labishbardiya/facepipe/issues"
+
+[tool.setuptools.packages.find]
+include = ["facepipe*"]
+exclude = ["tests*", "venv*", "evaluation/datasets*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
