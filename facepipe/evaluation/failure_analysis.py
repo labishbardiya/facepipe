@@ -12,7 +12,7 @@ from __future__ import annotations
 import dataclasses
 import json
 import os
-from enum import StrEnum
+from enum import Enum
 from pathlib import Path
 
 import cv2
@@ -24,7 +24,7 @@ from facepipe.observability.logging import get_logger
 logger = get_logger(__name__)
 
 
-class FailureReason(StrEnum):
+class FailureReason(str, Enum):
     """Categorization of why an image failed embedding extraction."""
     FILE_MISSING = "file_missing"
     READ_FAILURE = "read_failure"

@@ -16,27 +16,27 @@ from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class SecurityLevel(enum.StrEnum):
+class SecurityLevel(str, enum.Enum):
     """Security level for anti-spoofing and fusion decision boundaries."""
     LOW = "LOW"
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"
 
 
-class FusionSecurityLevel(enum.StrEnum):
+class FusionSecurityLevel(str, enum.Enum):
     """Decision fusion security level controlling acceptance thresholds."""
     STANDARD = "STANDARD"
     ELEVATED = "ELEVATED"
     MAXIMUM = "MAXIMUM"
 
 
-class RecognitionModel(enum.StrEnum):
+class RecognitionModel(str, enum.Enum):
     """Which recognition backbone to use."""
     ADAFACE = "adaface"
     ARCFACE = "arcface"
 
 
-class KeyProviderType(enum.StrEnum):
+class KeyProviderType(str, enum.Enum):
     """How encryption keys are sourced."""
     ENV = "env"
     FILE = "file"
