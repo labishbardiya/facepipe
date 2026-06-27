@@ -1,58 +1,42 @@
 <div align="center">
-  <img src="assets/logo.png" alt="FacePipe Logo" width="300" />
+  <img src="assets/logo.png" alt="FacePipe Logo" width="350" />
 </div>
 
-# FacePipe
+<div align="center">
 
-**The production-ready face recognition pipeline.**
-
-Detection, quality, liveness, deepfake, recognition, search, tracking, and fusion — all integrated, all configurable, all encrypted.
+**The production-ready, highly secure face recognition framework.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![CI](https://github.com/labishbardiya/facepipe/actions/workflows/ci.yml/badge.svg)](https://github.com/labishbardiya/facepipe/actions)
+[![Documentation](https://img.shields.io/badge/docs-MkDocs-blue.svg)](https://labishbardiya.github.io/facepipe/)
+
+</div>
 
 ---
 
-## Why FacePipe?
+**FacePipe** bridges the gap between academic face recognition and enterprise-grade deployment. It handles the heavy lifting of security, image quality, edge cases, and high-speed vector search so you can focus on building your application.
 
-| Feature | FacePipe | InsightFace | DeepFace | face_recognition |
-|---------|----------|-------------|----------|------------------|
-| Face Detection (SCRFD) | ✅ | ✅ | ✅ | ✅ |
-| Quality Gating | ✅ | ❌ | ❌ | ❌ |
-| Liveness / Anti-Spoofing | ✅ | ❌ | ❌ | ❌ |
-| Deepfake Detection | ✅ | ❌ | ❌ | ❌ |
-| Decision Fusion (7 signals) | ✅ | ❌ | ❌ | ❌ |
-| Template Aggregation | ✅ | ❌ | ❌ | ❌ |
-| Score Normalization (Z/T-norm) | ✅ | ❌ | ❌ | ❌ |
-| Multi-Model Ensemble | ✅ | ❌ | ❌ | ❌ |
-| Active Learning | ✅ | ❌ | ❌ | ❌ |
-| Encrypted Storage (AES-256) | ✅ | ❌ | ❌ | ❌ |
-| Scalable Search (FAISS HNSW) | ✅ | ❌ | ❌ | ❌ |
-| Video Tracking (ByteTrack) | ✅ | ❌ | ❌ | ❌ |
-| REST API | ✅ | ❌ | ✅ | ❌ |
+## 🌟 Key Features
 
-**FacePipe is for engineers building products**, not researchers running notebooks. If you need face recognition that handles spoofing, low quality, deepfakes, and unknown faces out of the box — this is it.
+* 🛡️ **Anti-Spoofing & Deepfake Detection:** Built-in defenses against presentation attacks and synthetic faces.
+* 📈 **Test-Time Augmentation (TTA):** State-of-the-art accuracy through multi-pass flip averaging.
+* 📸 **Quality Gating & Restoration:** Rejects bad captures, and automatically restores surveillance-quality faces using CodeFormer.
+* 🧠 **Decision Fusion Engine:** Doesn't just blindly match embeddings—fuses 7 different signals (liveness, quality, tracking) into one secure verdict.
+* ⚡ **Sub-Millisecond Search:** Integrated FAISS HNSW backend for blazing-fast 1:N retrieval.
+* 🔒 **Encrypted Storage:** AES-256 encryption at rest for all biometric templates.
 
 ---
 
-## Quick Start
+## ⚡ Quick Start
 
-### Install
+### 1. Install
 
 ```bash
 pip install facepipe
 ```
 
-Or from source:
-
-```bash
-git clone https://github.com/labishbardiya/facepipe.git
-cd facepipe
-pip install -e .
-```
-
-### Verify Two Faces (5 lines)
+### 2. Verify Two Faces
 
 ```python
 import cv2
@@ -69,148 +53,40 @@ def get_embedding(path):
     aligned = align_face(img, face.landmarks)
     return recognizer.extract(aligned).embedding
 
-similarity = float(np.dot(get_embedding("photo1.jpg"), get_embedding("photo2.jpg")))
-print(f"Same person: {similarity > 0.4} (similarity: {similarity:.4f})")
-```
+emb1 = get_embedding("alice1.jpg")
+emb2 = get_embedding("alice2.jpg")
 
-### Full Pipeline with Security
-
-```python
-from facepipe import RecognitionPipeline
-
-pipeline = RecognitionPipeline()
-pipeline.initialize()
-
-# Enroll
-result = pipeline.enroll(frames=[img], identity_id="user_001", name="John Doe")
-
-# Recognize (includes quality, liveness, deepfake, fusion)
-frame_result = pipeline.process_frame(new_image)
-for face in frame_result.faces:
-    print(f"{face.decision.identity}: {face.decision.confidence:.3f}")
-```
-
-### REST API
-
-```bash
-# Start the server
-facepipe-server
-# or: uvicorn entrypoints.server:app --host 0.0.0.0 --port 8000
-```
-
-### Docker
-
-```bash
-docker build -t facepipe .
-docker run -p 8000:8000 facepipe
-```
-
-### Interactive Demo
-
-```bash
-pip install facepipe[demo]
-python demo/app.py
-# Open http://localhost:7860
+similarity = float(np.dot(emb1, emb2))
+print(f"Match: {similarity > 0.4} (Similarity: {similarity:.4f})")
 ```
 
 ---
 
-## Architecture
+## 📖 Documentation
 
-```
-┌─────────────┐     ┌──────────┐     ┌──────────────┐     ┌──────────┐
-│   SCRFD      │────▸│ Quality  │────▸│  Deepfake    │────▸│ Liveness │
-│  Detection   │     │  Gate    │     │  Detection   │     │  Check   │
-└──────┬───────┘     └──────────┘     └──────────────┘     └────┬─────┘
-       │                                                        │
-       ▼                                                        ▼
-┌─────────────┐     ┌──────────┐     ┌──────────────┐     ┌──────────┐
-│  Alignment  │────▸│ Restore  │────▸│  AdaFace /   │────▸│  FAISS   │
-│ (5-point)   │     │ (if low  │     │  ArcFace     │     │  HNSW    │
-│             │     │  quality) │     │  + TTA       │     │  Search  │
-└─────────────┘     └──────────┘     └──────────────┘     └────┬─────┘
-                                                               │
-       ┌───────────────────────────────────────────────────────┘
-       ▼
-┌─────────────┐     ┌──────────┐     ┌──────────────┐     ┌──────────┐
-│  Open-Set   │────▸│ByteTrack │────▸│  Decision    │────▸│ Active   │
-│ Recognition │     │ Tracking │     │  Fusion      │     │ Learning │
-│             │     │          │     │ (7 signals)  │     │  Gate    │
-└─────────────┘     └──────────┘     └──────────────┘     └──────────┘
-```
+The example above just scratches the surface. For full tutorials on the **Decision Pipeline**, **Quality Assessment**, and **FAISS Vector Search**, visit our official documentation:
+
+👉 **[Read the FacePipe Documentation](https://labishbardiya.github.io/facepipe/)**
+
+- [Getting Started](https://labishbardiya.github.io/facepipe/getting-started/)
+- [Architecture Deep-Dive](https://labishbardiya.github.io/facepipe/architecture/)
+- [Security & Anti-Spoofing](https://labishbardiya.github.io/facepipe/security-and-anti-spoofing/)
+- [API Reference](https://labishbardiya.github.io/facepipe/api/)
 
 ---
 
-## Benchmark Results
+## 🛠️ Interactive Demo
 
-Evaluated on LFW with ArcFace R100 (buffalo_l) + TTA on Apple M4 (CoreML):
-
-| Metric | Value |
-|--------|-------|
-| **Accuracy** | 98.74% |
-| **AUC** | 0.9888 |
-| **EER** | 2.37% |
-| **TAR@FAR=1e-3** | 97.48% |
-| **Failed Pairs** | 43 / 6,000 |
-
-### Run Your Own Benchmarks
+FacePipe includes a built-in Gradio interface to help you visually test the quality and verification metrics.
 
 ```bash
-# LFW
-facepipe evaluate --pairs pairs.txt --lfw-dir lfw_funneled/ --output results.json
-
-# Failure analysis
-facepipe evaluate-failures --pairs pairs.txt --lfw-dir lfw_funneled/ --output failures.json
+pip install "facepipe[demo]"
+facepipe demo
 ```
+*Opens a local web interface at `http://localhost:7860`*
 
 ---
 
-## SOTA Techniques
-
-FacePipe implements techniques used by top NIST FRVT performers:
-
-- **Test-Time Augmentation** — Flip averaging + optional brightness/contrast augmentation
-- **Quality-Weighted Template Aggregation** — Fuses multi-frame embeddings with adaptive outlier rejection (mean - 1.5σ)
-- **Score Normalization** — Z-norm, T-norm, ZT-norm for per-identity calibration at tight operating points
-- **Multi-Model Ensemble** — Fuse ArcFace + AdaFace with PCA whitening or quality-gated selection
-- **Face Restoration** — CodeFormer-based restoration with re-alignment for surveillance-grade inputs
-
----
-
-## Configuration
-
-All settings are configurable via environment variables (prefix `FR_`):
-
-```bash
-# Recognition
-FR_RECOGNITION_TTA_ENABLED=true      # Enable test-time augmentation
-FR_RECOGNITION_TTA_EXTENDED=false    # Extended TTA (4 augmentations)
-
-# Score Normalization
-FR_NORM_METHOD=z_norm                # z_norm | t_norm | zt_norm | none
-FR_NORM_COHORT_SIZE=200
-
-# Template Aggregation
-FR_TEMPLATE_STRATEGY=quality_weighted  # quality_weighted | norm_weighted | top_k
-FR_TEMPLATE_OUTLIER_SIGMA=1.5
-
-# Security
-FR_FUSION_SECURITY_LEVEL=STANDARD     # STANDARD | ELEVATED | MAXIMUM
-FR_ENCRYPTION_KEY=<base64-32-byte-key>
-
-# API
-FR_API_HOST=0.0.0.0
-FR_API_PORT=8000
-```
-
-See `.env.example` for the full list.
-
----
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, testing, and PR process.
-
-## License
-
-MIT — see [LICENSE](LICENSE) for details.
+<div align="center">
+  <i>Developed with ❤️ by <a href="https://github.com/labishbardiya">Labish Bardiya</a>. Licensed under MIT.</i>
+</div>
