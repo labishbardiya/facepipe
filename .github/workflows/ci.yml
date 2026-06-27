@@ -54,8 +54,8 @@ jobs:
       - name: Verify Docker image
         run: |
           docker run --rm facepipe:latest python -c "
-          from core.recognition.template_aggregator import TemplateAggregator
-          from core.search.score_normalizer import ScoreNormalizer
-          from core.fusion.decision_engine import DecisionFusionEngine
+          from facepipe.core.recognition.template_aggregator import TemplateAggregator
+          from facepipe.core.search.score_normalizer import ScoreNormalizer
+          from facepipe.core.fusion.decision_engine import DecisionFusionEngine
           print('All imports OK')
           "
