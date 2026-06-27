@@ -17,12 +17,11 @@ from __future__ import annotations
 
 import dataclasses
 from collections import deque
-from typing import Dict, List, Optional
 
 import cv2
 import numpy as np
 
-from facepipe.config.settings import get_settings, DeepfakeSettings
+from facepipe.config.settings import DeepfakeSettings, get_settings
 from facepipe.observability.logging import get_logger
 
 logger = get_logger(__name__)
@@ -40,7 +39,7 @@ class DeepfakeResult:
     """
     is_real: bool
     confidence: float
-    method_scores: Dict[str, float]
+    method_scores: dict[str, float]
     details: str
 
 
@@ -57,20 +56,20 @@ class DeepfakeDetector:
 
     def __init__(
         self,
-        settings: Optional[DeepfakeSettings] = None,
+        settings: DeepfakeSettings | None = None,
         temporal_window: int = 10,
     ) -> None:
         self._settings = settings or get_settings().deepfake
         self._temporal_window = temporal_window
         # Track ID → recent face crops for temporal analysis
-        self._temporal_buffer: Dict[int, deque[np.ndarray]] = {}
+        self._temporal_buffer: dict[int, deque[np.ndarray]] = {}
 
     def detect(
         self,
         face_crop: np.ndarray,
-        full_frame: Optional[np.ndarray] = None,
-        face_bbox: Optional[np.ndarray] = None,
-        track_id: Optional[int] = None,
+        full_frame: np.ndarray | None = None,
+        face_bbox: np.ndarray | None = None,
+        track_id: int | None = None,
     ) -> DeepfakeResult:
         """Analyze a face crop for deepfake indicators.
 
@@ -91,7 +90,7 @@ class DeepfakeDetector:
                 details="Deepfake detection disabled.",
             )
 
-        method_scores: Dict[str, float] = {}
+        method_scores: dict[str, float] = {}
 
         # 1. Frequency analysis
         freq_score = self._analyze_frequency(face_crop)
@@ -207,7 +206,7 @@ class DeepfakeDetector:
         h, w = resized.shape
         blocks_h, blocks_w = h // 8, w // 8
 
-        dct_energies: List[float] = []
+        dct_energies: list[float] = []
         for i in range(blocks_h):
             for j in range(blocks_w):
                 block = resized[i * 8:(i + 1) * 8, j * 8:(j + 1) * 8]
@@ -320,7 +319,7 @@ class DeepfakeDetector:
             return 0.5  # Not enough frames yet
 
         # Compute frame-to-frame differences
-        diffs: List[float] = []
+        diffs: list[float] = []
         for i in range(1, len(buffer)):
             diff = np.mean(np.abs(buffer[i].astype(float) - buffer[i - 1].astype(float)))
             diffs.append(diff)

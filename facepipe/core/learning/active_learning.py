@@ -17,11 +17,10 @@ from __future__ import annotations
 import dataclasses
 import time
 from collections import defaultdict
-from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
-from facepipe.config.settings import get_settings, ActiveLearningSettings
+from facepipe.config.settings import ActiveLearningSettings, get_settings
 from facepipe.observability.logging import get_logger
 
 logger = get_logger(__name__)
@@ -40,9 +39,9 @@ class LearningDecision:
         is_novel: Whether the embedding is sufficiently different from existing.
     """
     action: str
-    identity_id: Optional[str]
+    identity_id: str | None
     confidence: float
-    embedding: Optional[np.ndarray]
+    embedding: np.ndarray | None
     reason: str
     is_novel: bool
 
@@ -58,17 +57,17 @@ class ActiveLearningGate:
         settings: Active learning settings. If None, loaded from global config.
     """
 
-    def __init__(self, settings: Optional[ActiveLearningSettings] = None) -> None:
+    def __init__(self, settings: ActiveLearningSettings | None = None) -> None:
         self._settings = settings or get_settings().active_learning
         # Rate limiting: identity_id → list of timestamps of recent auto-adds
-        self._rate_tracker: Dict[str, List[float]] = defaultdict(list)
+        self._rate_tracker: dict[str, list[float]] = defaultdict(list)
 
     def evaluate(
         self,
-        identity_id: Optional[str],
+        identity_id: str | None,
         confidence: float,
-        embedding: Optional[np.ndarray] = None,
-        existing_centroids: Optional[List[np.ndarray]] = None,
+        embedding: np.ndarray | None = None,
+        existing_centroids: list[np.ndarray] | None = None,
         quality_score: float = 1.0,
     ) -> LearningDecision:
         """Evaluate whether to learn from this recognition result.
@@ -181,7 +180,7 @@ class ActiveLearningGate:
     def _check_novelty(
         self,
         embedding: np.ndarray,
-        existing_centroids: Optional[List[np.ndarray]],
+        existing_centroids: list[np.ndarray] | None,
     ) -> bool:
         """Check if the embedding is sufficiently different from existing centroids.
 
@@ -199,7 +198,7 @@ class ActiveLearningGate:
 
         return True
 
-    def get_rate_stats(self) -> Dict[str, int]:
+    def get_rate_stats(self) -> dict[str, int]:
         """Return current rate limiting stats per identity."""
         now = time.time()
         one_hour_ago = now - 3600.0

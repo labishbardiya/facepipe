@@ -16,15 +16,13 @@ from __future__ import annotations
 
 import dataclasses
 import time
-from typing import Any, Dict, List, Optional
 
 import numpy as np
 
-from facepipe.config.settings import get_settings, Settings
+from facepipe.config.settings import Settings, get_settings
 from facepipe.core.alignment.face_align import align_face
 from facepipe.core.antispoof.liveness import LivenessDetector, LivenessResult
 from facepipe.core.clustering.identity_cluster import (
-    EmbeddingCluster,
     IdentityClusterEngine,
     IdentityClusters,
 )
@@ -64,14 +62,14 @@ class RecognitionResult:
     """
     track_id: int
     bbox: np.ndarray
-    identity: Optional[str]
+    identity: str | None
     decision: DecisionResult
     quality: QualityReport
     liveness: LivenessResult
     deepfake: DeepfakeResult
     openset: OpenSetResult
     learning: LearningDecision
-    embedding: Optional[EmbeddingResult]
+    embedding: EmbeddingResult | None
     latency_ms: float
 
 
@@ -92,7 +90,7 @@ class EnrollmentResult:
     identity_id: str
     name: str
     embeddings_stored: int
-    quality_reports: List[QualityReport]
+    quality_reports: list[QualityReport]
     rejected_count: int
     message: str
 
@@ -107,7 +105,7 @@ class RecognitionPipeline:
         settings: Global settings. If None, loaded from global config.
     """
 
-    def __init__(self, settings: Optional[Settings] = None) -> None:
+    def __init__(self, settings: Settings | None = None) -> None:
         self._settings = settings or get_settings()
         self._metrics = get_metrics()
 
@@ -127,11 +125,11 @@ class RecognitionPipeline:
         self._active_learning = ActiveLearningGate()
 
         # In-memory identity clusters (loaded from facepipe.storage)
-        self._identity_clusters: Dict[str, IdentityClusters] = {}
+        self._identity_clusters: dict[str, IdentityClusters] = {}
 
         self._is_initialized = False
 
-    def initialize(self, index_path: Optional[str] = None) -> None:
+    def initialize(self, index_path: str | None = None) -> None:
         """Initialize the pipeline: load models, index, and identity data.
 
         Args:
@@ -167,7 +165,7 @@ class RecognitionPipeline:
         self,
         frame: np.ndarray,
         camera_id: str = "default",
-    ) -> List[RecognitionResult]:
+    ) -> list[RecognitionResult]:
         """Process a single video frame through the full pipeline.
 
         Args:
@@ -179,7 +177,7 @@ class RecognitionPipeline:
         """
         self.initialize()
 
-        results: List[RecognitionResult] = []
+        results: list[RecognitionResult] = []
 
         with self._metrics.pipeline_latency():
             # 1. Detection
@@ -350,8 +348,8 @@ class RecognitionPipeline:
     def enroll(
         self,
         name: str,
-        frames: List[np.ndarray],
-        identity_id: Optional[str] = None,
+        frames: list[np.ndarray],
+        identity_id: str | None = None,
     ) -> EnrollmentResult:
         """Enroll a new identity with quality-gated embedding extraction.
 
@@ -370,10 +368,10 @@ class RecognitionPipeline:
         if identity_id is None:
             identity_id = str(ulid.new())
 
-        quality_reports: List[QualityReport] = []
-        accepted_embeddings: List[np.ndarray] = []
-        accepted_qualities: List[float] = []
-        accepted_norms: List[float] = []
+        quality_reports: list[QualityReport] = []
+        accepted_embeddings: list[np.ndarray] = []
+        accepted_qualities: list[float] = []
+        accepted_norms: list[float] = []
         rejected_count = 0
 
         for frame in frames:
@@ -480,14 +478,14 @@ class RecognitionPipeline:
 
     def _match_tracks_to_detections(
         self,
-        tracks: List[TrackedFace],
-        detections: List[DetectedFace],
-    ) -> List[tuple[TrackedFace, DetectedFace]]:
+        tracks: list[TrackedFace],
+        detections: list[DetectedFace],
+    ) -> list[tuple[TrackedFace, DetectedFace]]:
         """Match active tracks to detected faces by bbox proximity."""
         if not tracks or not detections:
             return []
 
-        pairs: List[tuple[TrackedFace, DetectedFace]] = []
+        pairs: list[tuple[TrackedFace, DetectedFace]] = []
         used_dets = set()
 
         for track in tracks:
@@ -528,8 +526,8 @@ class RecognitionPipeline:
         track: TrackedFace,
         quality: QualityReport,
         reason: str,
-        liveness: Optional[LivenessResult] = None,
-        deepfake: Optional[DeepfakeResult] = None,
+        liveness: LivenessResult | None = None,
+        deepfake: DeepfakeResult | None = None,
     ) -> RecognitionResult:
         """Create a RecognitionResult for a rejected face."""
         return RecognitionResult(
@@ -567,6 +565,6 @@ class RecognitionPipeline:
         return self._vector_store
 
     @property
-    def identity_clusters(self) -> Dict[str, IdentityClusters]:
+    def identity_clusters(self) -> dict[str, IdentityClusters]:
         """Access identity clusters."""
         return self._identity_clusters

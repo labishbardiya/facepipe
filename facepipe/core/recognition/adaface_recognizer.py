@@ -17,12 +17,11 @@ from __future__ import annotations
 
 import dataclasses
 from pathlib import Path
-from typing import List, Optional
 
 import cv2
 import numpy as np
 
-from facepipe.config.settings import get_settings, RecognitionModel, RecognitionSettings
+from facepipe.config.settings import RecognitionModel, RecognitionSettings, get_settings
 from facepipe.observability.logging import get_logger
 
 logger = get_logger(__name__)
@@ -56,7 +55,7 @@ class AdaFaceRecognizer:
     ADAFACE_VERSION = "adaface_ir101_webface12m_v1"
     ARCFACE_VERSION = "arcface_r100_buffalo_l_v1"
 
-    def __init__(self, settings: Optional[RecognitionSettings] = None) -> None:
+    def __init__(self, settings: RecognitionSettings | None = None) -> None:
         self._settings = settings or get_settings().recognition
         self._ort_session = None
         self._insightface_app = None
@@ -228,7 +227,7 @@ class AdaFaceRecognizer:
             raw_norm=float(np.mean(raw_norms)),
         )
 
-    def extract_batch(self, aligned_faces: List[np.ndarray]) -> List[EmbeddingResult]:
+    def extract_batch(self, aligned_faces: list[np.ndarray]) -> list[EmbeddingResult]:
         """Extract embeddings for a batch of aligned face crops.
 
         Args:

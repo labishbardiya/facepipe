@@ -11,11 +11,9 @@ The old db/ directory is preserved as backup.
 
 from __future__ import annotations
 
-import os
 import pickle
 import time
 from pathlib import Path
-from typing import Dict, List
 
 import numpy as np
 
@@ -45,9 +43,9 @@ def migrate_v1_to_v2() -> dict:
     logger.info("loading_v1_data")
 
     with open(raw_path, "rb") as f:
-        raw_embeddings: Dict[str, List[np.ndarray]] = pickle.load(f)
+        raw_embeddings: dict[str, list[np.ndarray]] = pickle.load(f)
 
-    labels: List[str] = []
+    labels: list[str] = []
     if labels_path.exists():
         with open(labels_path, "rb") as f:
             labels = pickle.load(f)
@@ -55,12 +53,12 @@ def migrate_v1_to_v2() -> dict:
     logger.info("v1_data_loaded", identities=len(raw_embeddings), labels=len(labels))
 
     # Import v2 modules
-    from facepipe.storage.encrypted_store import EncryptedEmbeddingStore
-    from facepipe.storage.identity_manager import IdentityManager
-    from facepipe.storage.event_store import EventStore, EventType
-    from facepipe.storage.feature_store import FeatureStore, EmbeddingRecord
-    from facepipe.core.search.faiss_store import FAISSStore
     from facepipe.core.clustering.identity_cluster import IdentityClusterEngine
+    from facepipe.core.search.faiss_store import FAISSStore
+    from facepipe.storage.encrypted_store import EncryptedEmbeddingStore
+    from facepipe.storage.event_store import EventStore, EventType
+    from facepipe.storage.feature_store import EmbeddingRecord, FeatureStore
+    from facepipe.storage.identity_manager import IdentityManager
 
     # Initialize v2 components
     enc_store = EncryptedEmbeddingStore()

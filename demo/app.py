@@ -12,8 +12,8 @@ Features:
 
 from __future__ import annotations
 
-import sys
 import os
+import sys
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -28,10 +28,10 @@ except ImportError:
     print("Or: pip install facepipe[demo]")
     sys.exit(1)
 
-from facepipe.core.detection.scrfd_detector import SCRFDDetector
 from facepipe.core.alignment.face_align import align_face
-from facepipe.core.recognition.adaface_recognizer import AdaFaceRecognizer
+from facepipe.core.detection.scrfd_detector import SCRFDDetector
 from facepipe.core.quality.face_quality import FaceQualityAssessor
+from facepipe.core.recognition.adaface_recognizer import AdaFaceRecognizer
 
 # Initialize models (lazy, loaded on first use)
 detector = SCRFDDetector()

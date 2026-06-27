@@ -14,12 +14,11 @@ from __future__ import annotations
 
 import dataclasses
 from collections import deque
-from typing import Dict, List, Optional
 
 import cv2
 import numpy as np
 
-from facepipe.config.settings import get_settings, AntispoofSettings, SecurityLevel
+from facepipe.config.settings import AntispoofSettings, SecurityLevel, get_settings
 from facepipe.observability.logging import get_logger
 
 logger = get_logger(__name__)
@@ -37,7 +36,7 @@ class LivenessResult:
     """
     is_live: bool
     confidence: float
-    method_scores: Dict[str, float]
+    method_scores: dict[str, float]
     security_level: str
 
 
@@ -51,18 +50,18 @@ class LivenessDetector:
 
     def __init__(
         self,
-        settings: Optional[AntispoofSettings] = None,
+        settings: AntispoofSettings | None = None,
         temporal_window: int = 8,
     ) -> None:
         self._settings = settings or get_settings().antispoof
         self._temporal_window = temporal_window
         # Track ID → recent face edge maps for temporal analysis
-        self._edge_buffer: Dict[int, deque[np.ndarray]] = {}
+        self._edge_buffer: dict[int, deque[np.ndarray]] = {}
 
     def check(
         self,
         face_crop: np.ndarray,
-        track_id: Optional[int] = None,
+        track_id: int | None = None,
     ) -> LivenessResult:
         """Run liveness checks on a face crop.
 
@@ -73,7 +72,7 @@ class LivenessDetector:
         Returns:
             LivenessResult with live/spoof decision and per-method scores.
         """
-        method_scores: Dict[str, float] = {}
+        method_scores: dict[str, float] = {}
         level = self._settings.security_level
 
         # Always run: LBP texture analysis (catches printed photos)
@@ -191,7 +190,7 @@ class LivenessDetector:
         y, x = np.ogrid[:h, :w]
         dist = np.sqrt((x - center_x) ** 2 + (y - center_y) ** 2)
 
-        low_freq_energy = float(np.sum(magnitude[dist <= radius]))
+        float(np.sum(magnitude[dist <= radius]))
         high_freq_energy = float(np.sum(magnitude[dist > radius * 2]))
         total_energy = float(np.sum(magnitude))
 
@@ -230,7 +229,7 @@ class LivenessDetector:
             return 0.5  # Need more frames
 
         # Compute edge similarity between consecutive frames
-        similarities: List[float] = []
+        similarities: list[float] = []
         for i in range(1, len(buffer)):
             intersection = np.sum(buffer[i] & buffer[i - 1])
             union = np.sum(buffer[i] | buffer[i - 1])

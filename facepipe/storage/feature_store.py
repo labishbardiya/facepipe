@@ -9,13 +9,8 @@ facial recognition systems manage their embedding data.
 from __future__ import annotations
 
 import dataclasses
-import json
 import sqlite3
-import time
 from pathlib import Path
-from typing import Dict, List, Optional
-
-import numpy as np
 
 from facepipe.config.settings import get_settings
 from facepipe.observability.logging import get_logger
@@ -63,7 +58,7 @@ class FeatureStore:
         db_path: Path to the SQLite database file.
     """
 
-    def __init__(self, db_path: Optional[str] = None) -> None:
+    def __init__(self, db_path: str | None = None) -> None:
         if db_path is None:
             db_path = str(get_settings().data_dir / "feature_store.db")
 
@@ -120,7 +115,7 @@ class FeatureStore:
             )
             conn.commit()
 
-    def get_records_by_identity(self, identity_id: str) -> List[EmbeddingRecord]:
+    def get_records_by_identity(self, identity_id: str) -> list[EmbeddingRecord]:
         """Get all embedding records for an identity."""
         with sqlite3.connect(self._db_path) as conn:
             conn.row_factory = sqlite3.Row
@@ -131,7 +126,7 @@ class FeatureStore:
 
         return [self._row_to_record(row) for row in rows]
 
-    def get_records_by_model(self, model_version: str) -> List[EmbeddingRecord]:
+    def get_records_by_model(self, model_version: str) -> list[EmbeddingRecord]:
         """Get all records for a specific model version (for migration)."""
         with sqlite3.connect(self._db_path) as conn:
             conn.row_factory = sqlite3.Row
@@ -142,7 +137,7 @@ class FeatureStore:
 
         return [self._row_to_record(row) for row in rows]
 
-    def get_record_count(self, identity_id: Optional[str] = None) -> int:
+    def get_record_count(self, identity_id: str | None = None) -> int:
         """Get total record count, optionally filtered by identity."""
         with sqlite3.connect(self._db_path) as conn:
             if identity_id:
@@ -164,7 +159,7 @@ class FeatureStore:
             conn.commit()
             return cursor.rowcount
 
-    def get_model_versions(self) -> Dict[str, int]:
+    def get_model_versions(self) -> dict[str, int]:
         """Get count of records per model version."""
         with sqlite3.connect(self._db_path) as conn:
             rows = conn.execute(

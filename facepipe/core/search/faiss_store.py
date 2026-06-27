@@ -18,14 +18,12 @@ from __future__ import annotations
 import json
 import os
 import threading
-from pathlib import Path
-from typing import Dict, List, Optional
 
 import faiss
 import numpy as np
 
-from facepipe.config.settings import get_settings, SearchSettings
-from facepipe.core.search.vector_store import SearchResult, VectorStore
+from facepipe.config.settings import SearchSettings, get_settings
+from facepipe.core.search.vector_store import SearchResult
 from facepipe.observability.logging import get_logger
 
 logger = get_logger(__name__)
@@ -44,15 +42,15 @@ class FAISSStore:
     def __init__(
         self,
         dim: int = 512,
-        settings: Optional[SearchSettings] = None,
+        settings: SearchSettings | None = None,
     ) -> None:
         self._dim = dim
         self._settings = settings or get_settings().search
         self._lock = threading.RLock()
 
         # ID mapping: string identity ID → int64 FAISS ID
-        self._id_to_faiss: Dict[str, List[int]] = {}
-        self._faiss_to_id: Dict[int, str] = {}
+        self._id_to_faiss: dict[str, list[int]] = {}
+        self._faiss_to_id: dict[int, str] = {}
         self._next_faiss_id: int = 0
 
         # Build HNSW index
@@ -68,7 +66,7 @@ class FAISSStore:
         index = faiss.IndexIDMap2(hnsw)
         return index
 
-    def add(self, ids: List[str], embeddings: np.ndarray) -> None:
+    def add(self, ids: list[str], embeddings: np.ndarray) -> None:
         """Add embeddings to the HNSW index.
 
         Args:
@@ -105,7 +103,7 @@ class FAISSStore:
 
         logger.debug("faiss_add", count=len(ids), total=self.size)
 
-    def search(self, query: np.ndarray, k: int = 5) -> List[SearchResult]:
+    def search(self, query: np.ndarray, k: int = 5) -> list[SearchResult]:
         """Search for k nearest neighbors.
 
         Args:
@@ -128,7 +126,7 @@ class FAISSStore:
         with self._lock:
             distances, indices = self._index.search(query, actual_k)
 
-        results: List[SearchResult] = []
+        results: list[SearchResult] = []
         for score, fid in zip(distances[0], indices[0]):
             if fid == -1:
                 continue
@@ -141,7 +139,7 @@ class FAISSStore:
 
         return results
 
-    def remove(self, ids: List[str]) -> None:
+    def remove(self, ids: list[str]) -> None:
         """Remove all embeddings for the given identity IDs.
 
         Note: HNSW doesn't support efficient deletion. We remove from the
@@ -266,7 +264,7 @@ class FAISSStore:
         """Embedding dimensionality."""
         return self._dim
 
-    def get_identity_ids(self) -> List[str]:
+    def get_identity_ids(self) -> list[str]:
         """Return all unique identity IDs in the index."""
         with self._lock:
             return list(self._id_to_faiss.keys())

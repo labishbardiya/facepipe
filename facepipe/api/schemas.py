@@ -4,10 +4,7 @@ Pydantic schemas for API request/response models.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
-
 from pydantic import BaseModel, Field
-
 
 # ──────────────────────────────────────────────────────────────
 # Enrollment
@@ -16,7 +13,7 @@ from pydantic import BaseModel, Field
 class EnrollRequest(BaseModel):
     """Enrollment request with base64-encoded images."""
     name: str = Field(..., description="Display name for the identity.", min_length=1, max_length=200)
-    images: List[str] = Field(..., description="List of base64-encoded JPEG/PNG images.", min_length=1, max_length=20)
+    images: list[str] = Field(..., description="List of base64-encoded JPEG/PNG images.", min_length=1, max_length=20)
 
 class QualityReportResponse(BaseModel):
     blur_score: float
@@ -25,7 +22,7 @@ class QualityReportResponse(BaseModel):
     size_score: float
     composite_score: float
     passes_enrollment: bool
-    rejection_reasons: List[str]
+    rejection_reasons: list[str]
 
 class EnrollResponse(BaseModel):
     success: bool
@@ -33,7 +30,7 @@ class EnrollResponse(BaseModel):
     name: str
     embeddings_stored: int
     rejected_count: int
-    quality_reports: List[QualityReportResponse]
+    quality_reports: list[QualityReportResponse]
     message: str
 
 
@@ -60,21 +57,21 @@ class MatchCandidate(BaseModel):
     rank: int
 
 class FaceResult(BaseModel):
-    identity: Optional[str] = None
+    identity: str | None = None
     confidence: float
     is_recognized: bool
     decision: str
     openset_decision: str
     component_scores: ComponentScores
-    top_matches: List[MatchCandidate]
+    top_matches: list[MatchCandidate]
     quality_composite: float
     is_live: bool
     is_real: bool
-    bbox: List[float]
+    bbox: list[float]
     active_learning_action: str
 
 class RecognizeResponse(BaseModel):
-    faces: List[FaceResult]
+    faces: list[FaceResult]
     face_count: int
     latency_ms: float
 
@@ -94,11 +91,11 @@ class IdentityResponse(BaseModel):
     is_active: bool
 
 class IdentityListResponse(BaseModel):
-    identities: List[IdentityResponse]
+    identities: list[IdentityResponse]
     total: int
 
 class IdentityUpdateRequest(BaseModel):
-    name: Optional[str] = None
+    name: str | None = None
 
 
 # ──────────────────────────────────────────────────────────────
@@ -115,7 +112,7 @@ class HealthResponse(BaseModel):
 
 class ReadinessResponse(BaseModel):
     ready: bool
-    checks: Dict[str, bool]
+    checks: dict[str, bool]
 
 
 # ──────────────────────────────────────────────────────────────
@@ -126,11 +123,11 @@ class EventResponse(BaseModel):
     event_id: str
     timestamp: float
     event_type: str
-    identity_id: Optional[str]
+    identity_id: str | None
     payload: str
 
 class EventQueryResponse(BaseModel):
-    events: List[EventResponse]
+    events: list[EventResponse]
     total: int
 
 
@@ -141,4 +138,4 @@ class EventQueryResponse(BaseModel):
 class ErrorResponse(BaseModel):
     error: str
     detail: str
-    request_id: Optional[str] = None
+    request_id: str | None = None

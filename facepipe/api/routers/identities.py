@@ -8,15 +8,15 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from facepipe.api.dependencies import get_identity_manager, get_event_store, get_pipeline
+from facepipe.api.dependencies import get_event_store, get_identity_manager, get_pipeline
 from facepipe.api.schemas import (
-    IdentityResponse,
     IdentityListResponse,
+    IdentityResponse,
     IdentityUpdateRequest,
 )
 from facepipe.core.pipeline import RecognitionPipeline
-from facepipe.storage.identity_manager import IdentityManager
 from facepipe.storage.event_store import EventStore, EventType
+from facepipe.storage.identity_manager import IdentityManager
 
 router = APIRouter()
 

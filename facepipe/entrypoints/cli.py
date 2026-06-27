@@ -27,10 +27,10 @@ def do_migrate(args: argparse.Namespace) -> None:
 
 def do_evaluate(args: argparse.Namespace) -> None:
     """Run benchmark evaluation."""
-    from facepipe.evaluation.benchmark import BenchmarkHarness
     from facepipe.config.settings import get_settings
+    from facepipe.evaluation.benchmark import BenchmarkHarness
 
-    settings = get_settings()
+    get_settings()
     harness = BenchmarkHarness()
 
     pairs = harness.parse_lfw_pairs(args.pairs, args.lfw_dir)
@@ -68,8 +68,8 @@ def do_evaluate_failures(args: argparse.Namespace) -> None:
 
 def do_inspect(args: argparse.Namespace) -> None:
     """Inspect identity database."""
-    from facepipe.storage.identity_manager import IdentityManager
     from facepipe.core.pipeline import RecognitionPipeline
+    from facepipe.storage.identity_manager import IdentityManager
 
     mgr = IdentityManager()
     pipeline = RecognitionPipeline()
@@ -78,7 +78,7 @@ def do_inspect(args: argparse.Namespace) -> None:
     print(f"Total Identities (Active): {mgr.count(active_only=True)}")
     print(f"Total Identities (All):    {mgr.count(active_only=False)}")
     print(f"Vector Store Index Size:   {pipeline.vector_store.size}")
-    
+
     if args.list:
         identities = mgr.list_all()
         print("\nActive Identities:")
@@ -113,7 +113,7 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
-    
+
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     # Migrate

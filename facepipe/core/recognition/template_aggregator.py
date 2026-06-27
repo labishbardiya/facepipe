@@ -15,11 +15,10 @@ Strategies:
 from __future__ import annotations
 
 import dataclasses
-from typing import List, Optional, Tuple
 
 import numpy as np
 
-from facepipe.config.settings import get_settings, TemplateSettings
+from facepipe.config.settings import TemplateSettings, get_settings
 from facepipe.observability.logging import get_logger
 
 logger = get_logger(__name__)
@@ -56,14 +55,14 @@ class TemplateAggregator:
         settings: Template aggregation settings. If None, loaded from facepipe.config.
     """
 
-    def __init__(self, settings: Optional[TemplateSettings] = None) -> None:
+    def __init__(self, settings: TemplateSettings | None = None) -> None:
         self._settings = settings or get_settings().template
 
     def aggregate(
         self,
-        embeddings: List[np.ndarray],
-        quality_scores: Optional[List[float]] = None,
-        raw_norms: Optional[List[float]] = None,
+        embeddings: list[np.ndarray],
+        quality_scores: list[float] | None = None,
+        raw_norms: list[float] | None = None,
     ) -> AggregatedTemplate:
         """Aggregate multiple embeddings into a single template.
 
@@ -138,9 +137,9 @@ class TemplateAggregator:
     def _reject_outliers(
         self,
         emb_array: np.ndarray,
-        quality_scores: List[float],
-        raw_norms: List[float],
-    ) -> Tuple[np.ndarray, List[float], List[float], int]:
+        quality_scores: list[float],
+        raw_norms: list[float],
+    ) -> tuple[np.ndarray, list[float], list[float], int]:
         """Adaptive per-template outlier rejection.
 
         Computes the centroid, then rejects embeddings whose similarity
@@ -186,14 +185,14 @@ class TemplateAggregator:
         return kept_embs, kept_quals, kept_norms, num_rejected
 
     @staticmethod
-    def _quality_weighted(emb_array: np.ndarray, quality_scores: List[float]) -> np.ndarray:
+    def _quality_weighted(emb_array: np.ndarray, quality_scores: list[float]) -> np.ndarray:
         """Quality-weighted average: Σ(q_i × e_i) / Σ(q_i)."""
         weights = np.array(quality_scores, dtype=np.float32)
         weights = weights / (weights.sum() + 1e-8)
         return np.average(emb_array, axis=0, weights=weights)
 
     @staticmethod
-    def _norm_weighted(emb_array: np.ndarray, raw_norms: List[float]) -> np.ndarray:
+    def _norm_weighted(emb_array: np.ndarray, raw_norms: list[float]) -> np.ndarray:
         """MagFace-style: weight by raw embedding norm.
 
         Low-quality images produce lower-norm embeddings, so they
@@ -203,7 +202,7 @@ class TemplateAggregator:
         weights = weights / (weights.sum() + 1e-8)
         return np.average(emb_array, axis=0, weights=weights)
 
-    def _top_k(self, emb_array: np.ndarray, quality_scores: List[float]) -> np.ndarray:
+    def _top_k(self, emb_array: np.ndarray, quality_scores: list[float]) -> np.ndarray:
         """Use only the top-K highest-quality embeddings."""
         k = min(self._settings.top_k, len(quality_scores))
         indices = np.argsort(quality_scores)[-k:]

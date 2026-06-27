@@ -9,7 +9,7 @@ any pipeline code.
 from __future__ import annotations
 
 import dataclasses
-from typing import List, Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable
 
 import numpy as np
 
@@ -37,7 +37,7 @@ class VectorStore(Protocol):
     for Milvus, Qdrant, Weaviate, etc. without pipeline changes.
     """
 
-    def add(self, ids: List[str], embeddings: np.ndarray) -> None:
+    def add(self, ids: list[str], embeddings: np.ndarray) -> None:
         """Add embeddings to the index.
 
         Args:
@@ -46,7 +46,7 @@ class VectorStore(Protocol):
         """
         ...
 
-    def search(self, query: np.ndarray, k: int = 5) -> List[SearchResult]:
+    def search(self, query: np.ndarray, k: int = 5) -> list[SearchResult]:
         """Search for the k nearest neighbors.
 
         Args:
@@ -58,7 +58,7 @@ class VectorStore(Protocol):
         """
         ...
 
-    def remove(self, ids: List[str]) -> None:
+    def remove(self, ids: list[str]) -> None:
         """Remove embeddings by identity ID.
 
         Args:

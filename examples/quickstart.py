@@ -10,8 +10,8 @@ import numpy as np
 
 def example_verify_two_faces():
     """Compare two face images — are they the same person?"""
-    from facepipe.core.detection.scrfd_detector import SCRFDDetector
     from facepipe.core.alignment.face_align import align_face
+    from facepipe.core.detection.scrfd_detector import SCRFDDetector
     from facepipe.core.recognition.adaface_recognizer import AdaFaceRecognizer
 
     detector = SCRFDDetector()

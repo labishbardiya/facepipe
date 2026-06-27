@@ -9,17 +9,17 @@ from __future__ import annotations
 
 import time
 import uuid
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from facepipe.api.dependencies import get_pipeline
-from facepipe.api.routers import enrollment, recognition, identities, health, metrics
+from facepipe.api.routers import enrollment, health, identities, metrics, recognition
 from facepipe.config.settings import get_settings
-from facepipe.observability.logging import setup_logging, get_logger
+from facepipe.observability.logging import get_logger, setup_logging
 
 logger = get_logger(__name__)
 

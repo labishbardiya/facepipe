@@ -14,13 +14,12 @@ clusters determines identity.
 from __future__ import annotations
 
 import dataclasses
-from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.metrics import silhouette_score
 
-from facepipe.config.settings import get_settings, ClusterSettings
+from facepipe.config.settings import ClusterSettings, get_settings
 from facepipe.observability.logging import get_logger
 
 logger = get_logger(__name__)
@@ -51,9 +50,9 @@ class IdentityClusters:
         all_qualities: Quality scores aligned with embeddings.
     """
     identity_id: str
-    clusters: List[EmbeddingCluster]
-    all_embeddings: List[np.ndarray]
-    all_qualities: List[float]
+    clusters: list[EmbeddingCluster]
+    all_embeddings: list[np.ndarray]
+    all_qualities: list[float]
 
 
 class IdentityClusterEngine:
@@ -63,14 +62,14 @@ class IdentityClusterEngine:
         settings: Clustering settings. If None, loaded from global config.
     """
 
-    def __init__(self, settings: Optional[ClusterSettings] = None) -> None:
+    def __init__(self, settings: ClusterSettings | None = None) -> None:
         self._settings = settings or get_settings().clustering
 
     def compute_clusters(
         self,
-        embeddings: List[np.ndarray],
-        qualities: Optional[List[float]] = None,
-    ) -> List[EmbeddingCluster]:
+        embeddings: list[np.ndarray],
+        qualities: list[float] | None = None,
+    ) -> list[EmbeddingCluster]:
         """Compute clusters from a list of embeddings.
 
         Automatically determines the optimal number of clusters using
@@ -138,7 +137,7 @@ class IdentityClusterEngine:
         labels = clustering.fit_predict(emb_array)
 
         # Build clusters
-        clusters: List[EmbeddingCluster] = []
+        clusters: list[EmbeddingCluster] = []
         for cluster_id in range(best_k):
             mask = labels == cluster_id
             if not mask.any():
@@ -233,7 +232,7 @@ class IdentityClusterEngine:
 
         return existing
 
-    def _merge_closest(self, clusters: List[EmbeddingCluster]) -> None:
+    def _merge_closest(self, clusters: list[EmbeddingCluster]) -> None:
         """Merge the two most similar clusters in-place."""
         if len(clusters) < 2:
             return
@@ -266,8 +265,8 @@ class IdentityClusterEngine:
 
     def get_all_centroids(
         self,
-        identity_clusters: Dict[str, IdentityClusters],
-    ) -> Tuple[List[str], np.ndarray]:
+        identity_clusters: dict[str, IdentityClusters],
+    ) -> tuple[list[str], np.ndarray]:
         """Extract all centroids from all identities for index building.
 
         Returns:
@@ -275,8 +274,8 @@ class IdentityClusterEngine:
             that centroid[i] belongs to. Multiple centroids may have the
             same identity_id (one per cluster).
         """
-        ids: List[str] = []
-        centroids: List[np.ndarray] = []
+        ids: list[str] = []
+        centroids: list[np.ndarray] = []
 
         for identity_id, ic in identity_clusters.items():
             for cluster in ic.clusters:

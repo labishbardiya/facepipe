@@ -14,7 +14,7 @@ import json
 import sqlite3
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import ulid
 
@@ -55,8 +55,8 @@ class EventStore:
 
     def __init__(
         self,
-        db_path: Optional[str] = None,
-        hmac_key: Optional[bytes] = None,
+        db_path: str | None = None,
+        hmac_key: bytes | None = None,
     ) -> None:
         if db_path is None:
             db_path = str(get_settings().data_dir / "events.db")
@@ -107,10 +107,10 @@ class EventStore:
     def append(
         self,
         event_type: str,
-        identity_id: Optional[str] = None,
-        payload: Optional[Dict[str, Any]] = None,
-        image_hash: Optional[str] = None,
-        source_ip: Optional[str] = None,
+        identity_id: str | None = None,
+        payload: dict[str, Any] | None = None,
+        image_hash: str | None = None,
+        source_ip: str | None = None,
     ) -> str:
         """Append a new event to the store.
 
@@ -163,12 +163,12 @@ class EventStore:
 
     def query(
         self,
-        event_type: Optional[str] = None,
-        identity_id: Optional[str] = None,
-        since: Optional[float] = None,
-        until: Optional[float] = None,
+        event_type: str | None = None,
+        identity_id: str | None = None,
+        since: float | None = None,
+        until: float | None = None,
         limit: int = 100,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Query events with filters.
 
         Args:
@@ -248,7 +248,7 @@ class EventStore:
 
         return True
 
-    def count(self, event_type: Optional[str] = None) -> int:
+    def count(self, event_type: str | None = None) -> int:
         """Count events, optionally filtered by type."""
         with sqlite3.connect(self._db_path) as conn:
             if event_type:
@@ -260,7 +260,7 @@ class EventStore:
                 row = conn.execute("SELECT COUNT(*) FROM events").fetchone()
             return row[0] if row else 0
 
-    def prune(self, older_than_days: Optional[int] = None) -> int:
+    def prune(self, older_than_days: int | None = None) -> int:
         """Remove events older than the retention period.
 
         Args:
@@ -287,7 +287,7 @@ class EventStore:
 
         return pruned
 
-    def _get_last_hmac(self) -> Optional[str]:
+    def _get_last_hmac(self) -> str | None:
         """Get the HMAC of the last event in the chain."""
         with sqlite3.connect(self._db_path) as conn:
             row = conn.execute(

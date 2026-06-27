@@ -10,13 +10,13 @@ from __future__ import annotations
 import base64
 import os
 from pathlib import Path
-from typing import Optional, Protocol
+from typing import Protocol
 
 import msgpack
 import numpy as np
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
-from facepipe.config.settings import get_settings, KeyProviderType
+from facepipe.config.settings import KeyProviderType, get_settings
 from facepipe.observability.logging import get_logger
 
 logger = get_logger(__name__)
@@ -70,8 +70,8 @@ class EncryptedEmbeddingStore:
 
     def __init__(
         self,
-        storage_dir: Optional[str] = None,
-        key_provider: Optional[KeyProvider] = None,
+        storage_dir: str | None = None,
+        key_provider: KeyProvider | None = None,
     ) -> None:
         settings = get_settings()
 
@@ -87,7 +87,7 @@ class EncryptedEmbeddingStore:
                 key_provider = EnvKeyProvider()
 
         self._key_provider = key_provider
-        self._aesgcm: Optional[AESGCM] = None
+        self._aesgcm: AESGCM | None = None
 
     def _get_cipher(self) -> AESGCM:
         """Lazily initialize the AES-GCM cipher."""
@@ -230,7 +230,7 @@ class EncryptedEmbeddingStore:
             Number of identities re-encrypted.
         """
         count = 0
-        old_cipher = self._get_cipher()
+        self._get_cipher()  # Initialize cipher before rotation
 
         # Load all with old key
         for identity_dir in self._storage_dir.iterdir():

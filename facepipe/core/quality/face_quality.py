@@ -16,12 +16,11 @@ from __future__ import annotations
 
 import dataclasses
 import math
-from typing import Optional
 
 import cv2
 import numpy as np
 
-from facepipe.config.settings import get_settings, QualitySettings
+from facepipe.config.settings import QualitySettings, get_settings
 from facepipe.observability.logging import get_logger
 
 logger = get_logger(__name__)
@@ -78,7 +77,7 @@ class FaceQualityAssessor:
         settings: Quality settings. If None, loaded from global config.
     """
 
-    def __init__(self, settings: Optional[QualitySettings] = None) -> None:
+    def __init__(self, settings: QualitySettings | None = None) -> None:
         self._settings = settings or get_settings().quality
 
     def assess(

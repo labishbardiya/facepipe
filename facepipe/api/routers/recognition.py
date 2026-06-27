@@ -14,13 +14,13 @@ import cv2
 import numpy as np
 from fastapi import APIRouter, Depends, HTTPException
 
-from facepipe.api.dependencies import get_pipeline, get_event_store
+from facepipe.api.dependencies import get_event_store, get_pipeline
 from facepipe.api.schemas import (
+    ComponentScores,
+    FaceResult,
+    MatchCandidate,
     RecognizeRequest,
     RecognizeResponse,
-    FaceResult,
-    ComponentScores,
-    MatchCandidate,
 )
 from facepipe.core.pipeline import RecognitionPipeline
 from facepipe.storage.event_store import EventStore, EventType

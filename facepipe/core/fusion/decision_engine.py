@@ -9,11 +9,10 @@ the decision boundary.
 from __future__ import annotations
 
 import dataclasses
-from typing import Dict, Optional
 
 import numpy as np
 
-from facepipe.config.settings import get_settings, FusionSettings, FusionSecurityLevel
+from facepipe.config.settings import FusionSecurityLevel, FusionSettings, get_settings
 from facepipe.observability.logging import get_logger
 
 logger = get_logger(__name__)
@@ -32,10 +31,10 @@ class DecisionResult:
         security_level: The security level used.
         active_learning_action: Recommended action (auto_add, verify, discard).
     """
-    identity: Optional[str]
+    identity: str | None
     confidence: float
     is_recognized: bool
-    component_scores: Dict[str, float]
+    component_scores: dict[str, float]
     decision_reason: str
     security_level: str
     active_learning_action: str
@@ -52,7 +51,7 @@ class DecisionFusionEngine:
         settings: Fusion settings. If None, loaded from global config.
     """
 
-    def __init__(self, settings: Optional[FusionSettings] = None) -> None:
+    def __init__(self, settings: FusionSettings | None = None) -> None:
         self._settings = settings or get_settings().fusion
 
     def decide(
@@ -64,7 +63,7 @@ class DecisionFusionEngine:
         tracking_consistency: float = 0.0,
         openset_margin: float = 0.0,
         deepfake_score: float = 1.0,
-        identity: Optional[str] = None,
+        identity: str | None = None,
         openset_decision: str = "unknown",
     ) -> DecisionResult:
         """Compute a fused confidence score and make a decision.

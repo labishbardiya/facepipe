@@ -12,9 +12,8 @@ from __future__ import annotations
 import dataclasses
 import json
 import os
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 import cv2
 import numpy as np
@@ -25,7 +24,7 @@ from facepipe.observability.logging import get_logger
 logger = get_logger(__name__)
 
 
-class FailureReason(str, Enum):
+class FailureReason(StrEnum):
     """Categorization of why an image failed embedding extraction."""
     FILE_MISSING = "file_missing"
     READ_FAILURE = "read_failure"
@@ -53,13 +52,13 @@ class ImageDiagnostic:
     path: str
     exists: bool
     readable: bool
-    resolution: Optional[Tuple[int, int]] = None
-    blur_score: Optional[float] = None
-    brightness: Optional[float] = None
+    resolution: tuple[int, int] | None = None
+    blur_score: float | None = None
+    brightness: float | None = None
     face_detected: bool = False
-    face_score: Optional[float] = None
-    face_area_ratio: Optional[float] = None
-    failure_reason: Optional[FailureReason] = None
+    face_score: float | None = None
+    face_area_ratio: float | None = None
+    failure_reason: FailureReason | None = None
 
 
 @dataclasses.dataclass
@@ -100,12 +99,12 @@ class FailureAnalysisReport:
     failed_pairs: int
     success_pairs: int
     failure_rate: float
-    failure_breakdown: Dict[str, int]
+    failure_breakdown: dict[str, int]
     positive_failures: int
     negative_failures: int
-    failed_records: List[FailedPairRecord]
-    success_sample_stats: Dict[str, float]
-    failure_stats: Dict[str, float]
+    failed_records: list[FailedPairRecord]
+    success_sample_stats: dict[str, float]
+    failure_stats: dict[str, float]
 
 
 # Minimum face crop dimension (pixels) below which we flag IMAGE_TOO_SMALL
@@ -123,7 +122,7 @@ class FailureAnalyzer:
         detector: SCRFD detector instance. If None, creates one.
     """
 
-    def __init__(self, detector: Optional[SCRFDDetector] = None) -> None:
+    def __init__(self, detector: SCRFDDetector | None = None) -> None:
         self._detector = detector or SCRFDDetector()
 
     def diagnose_image(self, image_path: str) -> ImageDiagnostic:
@@ -180,7 +179,7 @@ class FailureAnalyzer:
 
     def analyze_pairs(
         self,
-        pairs: List[Tuple[str, str, int]],
+        pairs: list[tuple[str, str, int]],
         success_sample_size: int = 200,
     ) -> FailureAnalysisReport:
         """Analyze all pairs and separate failures from successes.
@@ -197,9 +196,9 @@ class FailureAnalyzer:
         Returns:
             FailureAnalysisReport with full diagnostics.
         """
-        failed_records: List[FailedPairRecord] = []
-        success_diagnostics: List[ImageDiagnostic] = []
-        failure_diagnostics: List[ImageDiagnostic] = []
+        failed_records: list[FailedPairRecord] = []
+        success_diagnostics: list[ImageDiagnostic] = []
+        failure_diagnostics: list[ImageDiagnostic] = []
 
         positive_failures = 0
         negative_failures = 0
@@ -242,7 +241,7 @@ class FailureAnalyzer:
                 )
 
         # Build failure breakdown
-        failure_breakdown: Dict[str, int] = {}
+        failure_breakdown: dict[str, int] = {}
         for diag in failure_diagnostics:
             reason = diag.failure_reason.value if diag.failure_reason else "unknown"
             failure_breakdown[reason] = failure_breakdown.get(reason, 0) + 1
@@ -274,7 +273,7 @@ class FailureAnalyzer:
         return report
 
     @staticmethod
-    def _compute_quality_stats(diagnostics: List[ImageDiagnostic]) -> Dict[str, float]:
+    def _compute_quality_stats(diagnostics: list[ImageDiagnostic]) -> dict[str, float]:
         """Compute aggregate quality statistics from a list of diagnostics."""
         if not diagnostics:
             return {}
@@ -284,7 +283,7 @@ class FailureAnalyzer:
         resolutions = [d.resolution for d in diagnostics if d.resolution is not None]
         face_scores = [d.face_score for d in diagnostics if d.face_score is not None]
 
-        stats: Dict[str, float] = {
+        stats: dict[str, float] = {
             "count": float(len(diagnostics)),
         }
 

@@ -19,7 +19,6 @@ from __future__ import annotations
 
 import dataclasses
 from pathlib import Path
-from typing import Optional
 
 import cv2
 import numpy as np
@@ -65,7 +64,7 @@ class FaceRestorer:
         self,
         quality_threshold: float = 0.45,
         fidelity_weight: float = 0.75,
-        model_path: Optional[str] = None,
+        model_path: str | None = None,
     ) -> None:
         self._quality_threshold = quality_threshold
         self._fidelity_weight = fidelity_weight

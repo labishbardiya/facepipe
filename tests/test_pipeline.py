@@ -1,5 +1,3 @@
-import pytest
-import numpy as np
 
 def test_pipeline_initialization():
     from facepipe.core.pipeline import RecognitionPipeline

@@ -11,11 +11,11 @@ Moves beyond binary known/unknown decisions to handle:
 from __future__ import annotations
 
 import dataclasses
-from typing import List, Literal, Optional
+from typing import Literal
 
 import numpy as np
 
-from facepipe.config.settings import get_settings, OpenSetSettings
+from facepipe.config.settings import OpenSetSettings, get_settings
 from facepipe.core.search.vector_store import SearchResult
 from facepipe.observability.logging import get_logger
 
@@ -51,8 +51,8 @@ class OpenSetResult:
         reason: Human-readable explanation of the decision.
     """
     decision: Literal["recognized", "unknown", "ambiguous", "duplicate_identity"]
-    top_matches: List[MatchCandidate]
-    best_identity: Optional[str]
+    top_matches: list[MatchCandidate]
+    best_identity: str | None
     best_score: float
     margin: float
     confidence: float
@@ -70,10 +70,10 @@ class OpenSetRecognizer:
         settings: Open-set settings. If None, loaded from global config.
     """
 
-    def __init__(self, settings: Optional[OpenSetSettings] = None) -> None:
+    def __init__(self, settings: OpenSetSettings | None = None) -> None:
         self._settings = settings or get_settings().openset
 
-    def analyze(self, search_results: List[SearchResult]) -> OpenSetResult:
+    def analyze(self, search_results: list[SearchResult]) -> OpenSetResult:
         """Analyze search results for open-set recognition.
 
         Args:

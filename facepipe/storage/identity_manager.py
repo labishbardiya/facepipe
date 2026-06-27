@@ -12,9 +12,7 @@ import dataclasses
 import sqlite3
 import time
 from pathlib import Path
-from typing import Dict, List, Optional
 
-import numpy as np
 import ulid
 
 from facepipe.config.settings import get_settings
@@ -54,7 +52,7 @@ class IdentityManager:
         db_path: Path to the identity metadata database.
     """
 
-    def __init__(self, db_path: Optional[str] = None) -> None:
+    def __init__(self, db_path: str | None = None) -> None:
         if db_path is None:
             db_path = str(get_settings().data_dir / "identities.db")
 
@@ -91,7 +89,7 @@ class IdentityManager:
         embedding_count: int = 0,
         cluster_count: int = 0,
         model_version: str = "",
-        identity_id: Optional[str] = None,
+        identity_id: str | None = None,
     ) -> IdentityRecord:
         """Create a new identity record.
 
@@ -137,7 +135,7 @@ class IdentityManager:
         logger.info("identity_created", identity_id=identity_id, name=name)
         return record
 
-    def get(self, identity_id: str) -> Optional[IdentityRecord]:
+    def get(self, identity_id: str) -> IdentityRecord | None:
         """Get an identity by ID."""
         with sqlite3.connect(self._db_path) as conn:
             conn.row_factory = sqlite3.Row
@@ -148,7 +146,7 @@ class IdentityManager:
 
         return self._row_to_record(row) if row else None
 
-    def get_by_name(self, name: str) -> List[IdentityRecord]:
+    def get_by_name(self, name: str) -> list[IdentityRecord]:
         """Get identities by display name (may return multiple)."""
         with sqlite3.connect(self._db_path) as conn:
             conn.row_factory = sqlite3.Row
@@ -159,7 +157,7 @@ class IdentityManager:
 
         return [self._row_to_record(row) for row in rows]
 
-    def list_all(self, active_only: bool = True) -> List[IdentityRecord]:
+    def list_all(self, active_only: bool = True) -> list[IdentityRecord]:
         """List all identities."""
         with sqlite3.connect(self._db_path) as conn:
             conn.row_factory = sqlite3.Row
@@ -177,10 +175,10 @@ class IdentityManager:
     def update(
         self,
         identity_id: str,
-        name: Optional[str] = None,
-        embedding_count: Optional[int] = None,
-        cluster_count: Optional[int] = None,
-        last_seen: Optional[float] = None,
+        name: str | None = None,
+        embedding_count: int | None = None,
+        cluster_count: int | None = None,
+        last_seen: float | None = None,
     ) -> bool:
         """Update identity metadata. Returns True if found and updated."""
         updates = []
@@ -251,7 +249,7 @@ class IdentityManager:
                 row = conn.execute("SELECT COUNT(*) FROM identities").fetchone()
             return row[0] if row else 0
 
-    def search_by_name(self, query: str) -> List[IdentityRecord]:
+    def search_by_name(self, query: str) -> list[IdentityRecord]:
         """Search identities by name (case-insensitive partial match)."""
         with sqlite3.connect(self._db_path) as conn:
             conn.row_factory = sqlite3.Row

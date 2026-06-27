@@ -14,12 +14,12 @@ full recognition pipeline on new/changed faces.
 from __future__ import annotations
 
 import dataclasses
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 
-from facepipe.config.settings import get_settings, TrackingSettings
+from facepipe.config.settings import TrackingSettings, get_settings
 from facepipe.observability.logging import get_logger
 
 logger = get_logger(__name__)
@@ -54,10 +54,10 @@ class TrackedFace:
     score: float
     frames_tracked: int = 0
     frames_since_update: int = 0
-    recognition_result: Optional[Any] = None
+    recognition_result: Any | None = None
     frames_since_recognition: int = 0
     is_confirmed: bool = False
-    _kalman: Optional[KalmanState] = dataclasses.field(default=None, repr=False)
+    _kalman: KalmanState | None = dataclasses.field(default=None, repr=False)
 
 
 class ByteTracker:
@@ -71,16 +71,16 @@ class ByteTracker:
         settings: Tracking settings. If None, loaded from global config.
     """
 
-    def __init__(self, settings: Optional[TrackingSettings] = None) -> None:
+    def __init__(self, settings: TrackingSettings | None = None) -> None:
         self._settings = settings or get_settings().tracking
-        self._tracks: Dict[int, TrackedFace] = {}
+        self._tracks: dict[int, TrackedFace] = {}
         self._next_id: int = 0
         self._frame_count: int = 0
 
     def update(
         self,
-        detections: List[Tuple[np.ndarray, float]],
-    ) -> List[TrackedFace]:
+        detections: list[tuple[np.ndarray, float]],
+    ) -> list[TrackedFace]:
         """Update tracks with new detections.
 
         Args:
@@ -150,11 +150,11 @@ class ByteTracker:
 
     def _match_stage(
         self,
-        tracks: List[TrackedFace],
+        tracks: list[TrackedFace],
         track_bboxes: np.ndarray,
         det_bboxes: np.ndarray,
         det_indices: np.ndarray,
-    ) -> Tuple[List[int], List[int]]:
+    ) -> tuple[list[int], list[int]]:
         """Match detections to tracks using IoU with Hungarian algorithm.
 
         Returns:
@@ -227,7 +227,7 @@ class ByteTracker:
         for tid in dead_ids:
             del self._tracks[tid]
 
-    def _get_active_tracks(self) -> List[TrackedFace]:
+    def _get_active_tracks(self) -> list[TrackedFace]:
         """Return all currently active tracks."""
         return list(self._tracks.values())
 
@@ -264,8 +264,8 @@ class ByteTracker:
         Returns:
             (N, M) IoU matrix
         """
-        n = boxes_a.shape[0]
-        m = boxes_b.shape[0]
+        boxes_a.shape[0]
+        boxes_b.shape[0]
 
         # Compute intersections
         x1 = np.maximum(boxes_a[:, 0:1], boxes_b[:, 0:1].T)  # (N, M)
@@ -288,6 +288,6 @@ class ByteTracker:
         """Number of active tracks."""
         return len(self._tracks)
 
-    def get_track(self, track_id: int) -> Optional[TrackedFace]:
+    def get_track(self, track_id: int) -> TrackedFace | None:
         """Get a specific track by ID."""
         return self._tracks.get(track_id)

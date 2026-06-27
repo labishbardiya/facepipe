@@ -5,13 +5,12 @@ Shared FastAPI dependencies — dependency injection for pipeline, storage, etc.
 from __future__ import annotations
 
 import functools
-from typing import Generator
 
 from facepipe.core.pipeline import RecognitionPipeline
-from facepipe.storage.identity_manager import IdentityManager
+from facepipe.storage.encrypted_store import EncryptedEmbeddingStore
 from facepipe.storage.event_store import EventStore
 from facepipe.storage.feature_store import FeatureStore
-from facepipe.storage.encrypted_store import EncryptedEmbeddingStore
+from facepipe.storage.identity_manager import IdentityManager
 
 
 @functools.lru_cache(maxsize=1)

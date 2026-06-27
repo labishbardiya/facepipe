@@ -11,33 +11,32 @@ from __future__ import annotations
 import enum
 import functools
 from pathlib import Path
-from typing import List
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class SecurityLevel(str, enum.Enum):
+class SecurityLevel(enum.StrEnum):
     """Security level for anti-spoofing and fusion decision boundaries."""
     LOW = "LOW"
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"
 
 
-class FusionSecurityLevel(str, enum.Enum):
+class FusionSecurityLevel(enum.StrEnum):
     """Decision fusion security level controlling acceptance thresholds."""
     STANDARD = "STANDARD"
     ELEVATED = "ELEVATED"
     MAXIMUM = "MAXIMUM"
 
 
-class RecognitionModel(str, enum.Enum):
+class RecognitionModel(enum.StrEnum):
     """Which recognition backbone to use."""
     ADAFACE = "adaface"
     ARCFACE = "arcface"
 
 
-class KeyProviderType(str, enum.Enum):
+class KeyProviderType(enum.StrEnum):
     """How encryption keys are sourced."""
     ENV = "env"
     FILE = "file"
@@ -188,7 +187,7 @@ class EnsembleSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="FR_ENSEMBLE_")
 
     enabled: bool = Field(default=False, description="Enable multi-model ensemble.")
-    models: List[str] = Field(default=["adaface", "arcface"], description="Models to ensemble.")
+    models: list[str] = Field(default=["adaface", "arcface"], description="Models to ensemble.")
     fusion_strategy: str = Field(default="score_level", description="Fusion: concat_pca | score_level | quality_gated")
 
 
@@ -210,7 +209,7 @@ class APISettings(BaseSettings):
     host: str = Field(default="0.0.0.0")
     port: int = Field(default=8000)
     workers: int = Field(default=4)
-    cors_origins: List[str] = Field(default=["*"])
+    cors_origins: list[str] = Field(default=["*"])
     rate_limit: int = Field(default=100, description="Max requests per minute per client.")
 
 

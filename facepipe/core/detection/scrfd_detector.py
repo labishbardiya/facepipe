@@ -8,13 +8,11 @@ detection size, confidence threshold, and GPU/CPU/CoreML runtime selection.
 from __future__ import annotations
 
 import dataclasses
-from typing import List, Optional
 
-import cv2
 import numpy as np
 from insightface.app import FaceAnalysis
 
-from facepipe.config.settings import get_settings, DetectionSettings
+from facepipe.config.settings import DetectionSettings, get_settings
 from facepipe.observability.logging import get_logger
 
 logger = get_logger(__name__)
@@ -53,12 +51,12 @@ class SCRFDDetector:
 
     def __init__(
         self,
-        settings: Optional[DetectionSettings] = None,
-        ctx_id: Optional[int] = None,
+        settings: DetectionSettings | None = None,
+        ctx_id: int | None = None,
     ) -> None:
         self._settings = settings or get_settings().detection
         self._ctx_id = ctx_id if ctx_id is not None else self._auto_detect_device()
-        self._app: Optional[FaceAnalysis] = None
+        self._app: FaceAnalysis | None = None
 
     @staticmethod
     def _auto_detect_device() -> int:
@@ -93,13 +91,13 @@ class SCRFDDetector:
                 providers = [p for p in ["TensorrtExecutionProvider", "CUDAExecutionProvider", "CoreMLExecutionProvider", "CPUExecutionProvider"] if p in available] or ["CPUExecutionProvider"]
             except ImportError:
                 providers = ["CPUExecutionProvider"]
-                
+
             self._app = FaceAnalysis(name="buffalo_l", providers=providers)
             self._app.prepare(ctx_id=0 if "CUDAExecutionProvider" in providers else -1, det_size=det_size)
             logger.info("scrfd_loaded", providers=providers)
         return self._app
 
-    def detect(self, frame: np.ndarray) -> List[DetectedFace]:
+    def detect(self, frame: np.ndarray) -> list[DetectedFace]:
         """Detect all faces in a frame.
 
         Args:
@@ -112,7 +110,7 @@ class SCRFDDetector:
         raw_faces = app.get(frame)
 
         frame_area = frame.shape[0] * frame.shape[1]
-        results: List[DetectedFace] = []
+        results: list[DetectedFace] = []
 
         for face in raw_faces:
             if face.det_score < self._settings.threshold:

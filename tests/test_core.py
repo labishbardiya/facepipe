@@ -7,8 +7,6 @@ so they run instantly without GPU or model files.
 """
 
 import numpy as np
-import pytest
-
 
 # ──────────────────────────────────────────────────────────────
 # Template Aggregator
@@ -98,7 +96,7 @@ class TestScoreNormalizer:
     """Test Z-norm / T-norm score normalization."""
 
     def test_z_norm_calibration(self):
-        from facepipe.core.search.score_normalizer import ScoreNormalizer, NormStats
+        from facepipe.core.search.score_normalizer import NormStats, ScoreNormalizer
         norm = ScoreNormalizer()
 
         # Manually set stats

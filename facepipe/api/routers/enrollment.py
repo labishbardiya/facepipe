@@ -8,18 +8,22 @@ from __future__ import annotations
 
 import base64
 import hashlib
-import time
 
 import cv2
 import numpy as np
 from fastapi import APIRouter, Depends, HTTPException
 
-from facepipe.api.dependencies import get_pipeline, get_identity_manager, get_event_store, get_encrypted_store
+from facepipe.api.dependencies import (
+    get_encrypted_store,
+    get_event_store,
+    get_identity_manager,
+    get_pipeline,
+)
 from facepipe.api.schemas import EnrollRequest, EnrollResponse, QualityReportResponse
 from facepipe.core.pipeline import RecognitionPipeline
-from facepipe.storage.identity_manager import IdentityManager
-from facepipe.storage.event_store import EventStore, EventType
 from facepipe.storage.encrypted_store import EncryptedEmbeddingStore
+from facepipe.storage.event_store import EventStore, EventType
+from facepipe.storage.identity_manager import IdentityManager
 
 router = APIRouter()
 

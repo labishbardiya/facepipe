@@ -12,11 +12,10 @@ Used by top NIST FRVT performers but underused in open-source implementations.
 from __future__ import annotations
 
 import dataclasses
-from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
-from facepipe.config.settings import get_settings, NormalizationSettings
+from facepipe.config.settings import NormalizationSettings, get_settings
 from facepipe.observability.logging import get_logger
 
 logger = get_logger(__name__)
@@ -48,14 +47,14 @@ class ScoreNormalizer:
         settings: Normalization settings. If None, loaded from facepipe.config.
     """
 
-    def __init__(self, settings: Optional[NormalizationSettings] = None) -> None:
+    def __init__(self, settings: NormalizationSettings | None = None) -> None:
         self._settings = settings or get_settings().normalization
 
         # Pre-computed Z-norm stats per identity
-        self._z_stats: Dict[str, NormStats] = {}
+        self._z_stats: dict[str, NormStats] = {}
 
         # Cohort embeddings used for computing impostor distributions
-        self._cohort: Optional[np.ndarray] = None
+        self._cohort: np.ndarray | None = None
 
     @property
     def method(self) -> str:
@@ -82,7 +81,7 @@ class ScoreNormalizer:
 
     def build_cohort_from_index(
         self,
-        all_embeddings: Dict[str, List[np.ndarray]],
+        all_embeddings: dict[str, list[np.ndarray]],
     ) -> None:
         """Build a cohort by sampling diverse embeddings from the index.
 
@@ -93,7 +92,7 @@ class ScoreNormalizer:
             all_embeddings: Dict mapping identity_id → list of embeddings.
         """
         target_size = self._settings.cohort_size
-        sampled: List[np.ndarray] = []
+        sampled: list[np.ndarray] = []
 
         identity_ids = list(all_embeddings.keys())
         np.random.shuffle(identity_ids)
@@ -116,7 +115,7 @@ class ScoreNormalizer:
     def calibrate_identity(
         self,
         identity_id: str,
-        identity_embeddings: List[np.ndarray],
+        identity_embeddings: list[np.ndarray],
     ) -> None:
         """Pre-compute Z-norm statistics for a single identity.
 
@@ -131,7 +130,7 @@ class ScoreNormalizer:
             return
 
         # Compute similarity of each identity embedding against cohort
-        impostor_scores: List[float] = []
+        impostor_scores: list[float] = []
         for emb in identity_embeddings:
             emb_flat = emb.flatten().astype(np.float32)
             sims = self._cohort @ emb_flat
@@ -148,7 +147,7 @@ class ScoreNormalizer:
 
     def calibrate_all(
         self,
-        all_embeddings: Dict[str, List[np.ndarray]],
+        all_embeddings: dict[str, list[np.ndarray]],
     ) -> None:
         """Calibrate Z-norm stats for all enrolled identities.
 
@@ -163,8 +162,8 @@ class ScoreNormalizer:
     def normalize(
         self,
         raw_score: float,
-        identity_id: Optional[str] = None,
-        query_embedding: Optional[np.ndarray] = None,
+        identity_id: str | None = None,
+        query_embedding: np.ndarray | None = None,
     ) -> float:
         """Normalize a raw similarity score.
 
@@ -195,7 +194,7 @@ class ScoreNormalizer:
         logger.warning("unknown_normalization_method", method=method)
         return raw_score
 
-    def _z_normalize(self, raw_score: float, identity_id: Optional[str]) -> float:
+    def _z_normalize(self, raw_score: float, identity_id: str | None) -> float:
         """Z-norm: normalize using pre-computed per-identity impostor stats."""
         if identity_id is None or identity_id not in self._z_stats:
             return raw_score
@@ -203,7 +202,7 @@ class ScoreNormalizer:
         stats = self._z_stats[identity_id]
         return (raw_score - stats.impostor_mean) / stats.impostor_std
 
-    def _t_normalize(self, raw_score: float, query_embedding: Optional[np.ndarray]) -> float:
+    def _t_normalize(self, raw_score: float, query_embedding: np.ndarray | None) -> float:
         """T-norm: normalize using per-query impostor distribution."""
         if query_embedding is None or self._cohort is None:
             return raw_score
@@ -219,7 +218,7 @@ class ScoreNormalizer:
     def normalize_search_results(
         self,
         results: list,
-        query_embedding: Optional[np.ndarray] = None,
+        query_embedding: np.ndarray | None = None,
     ) -> list:
         """Normalize scores for a list of search results in-place.
 

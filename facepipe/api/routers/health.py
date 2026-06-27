@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends
 
-from facepipe.api.dependencies import get_pipeline, get_identity_manager
+from facepipe.api.dependencies import get_identity_manager, get_pipeline
 from facepipe.api.schemas import HealthResponse, ReadinessResponse
 from facepipe.core.pipeline import RecognitionPipeline
 from facepipe.storage.identity_manager import IdentityManager

@@ -13,7 +13,6 @@ Supported models:
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 from facepipe.config.settings import get_settings

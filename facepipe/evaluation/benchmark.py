@@ -16,12 +16,10 @@ import dataclasses
 import json
 import os
 import time
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
 
 import cv2
 import numpy as np
-from sklearn.metrics import roc_curve, auc
+from sklearn.metrics import auc, roc_curve
 
 from facepipe.core.alignment.face_align import align_face
 from facepipe.core.detection.scrfd_detector import SCRFDDetector
@@ -71,12 +69,12 @@ class BenchmarkResult:
     threshold: float
     auc_score: float
     eer: float
-    tar_at_far: Dict[str, float]  # {"1e-1": 0.99, "1e-2": 0.98, ...}
+    tar_at_far: dict[str, float]  # {"1e-1": 0.99, "1e-2": 0.98, ...}
     total_pairs: int
     timestamp: float
     latency_per_pair_ms: float
-    failed_pairs: List[FailedPair] = dataclasses.field(default_factory=list)
-    failure_summary: Dict[str, int] = dataclasses.field(default_factory=dict)
+    failed_pairs: list[FailedPair] = dataclasses.field(default_factory=list)
+    failure_summary: dict[str, int] = dataclasses.field(default_factory=dict)
 
 
 class BenchmarkHarness:
@@ -92,15 +90,15 @@ class BenchmarkHarness:
 
     def __init__(
         self,
-        detector: Optional[SCRFDDetector] = None,
-        recognizer: Optional[AdaFaceRecognizer] = None,
+        detector: SCRFDDetector | None = None,
+        recognizer: AdaFaceRecognizer | None = None,
     ) -> None:
         self._detector = detector or SCRFDDetector()
         self._recognizer = recognizer or AdaFaceRecognizer()
 
     def evaluate_pairs(
         self,
-        pairs: List[Tuple[str, str, int]],
+        pairs: list[tuple[str, str, int]],
         dataset_name: str = "custom",
     ) -> BenchmarkResult:
         """Evaluate a list of image pairs.
@@ -113,11 +111,11 @@ class BenchmarkHarness:
         Returns:
             BenchmarkResult with all metrics.
         """
-        scores: List[float] = []
-        labels: List[int] = []
-        latencies: List[float] = []
-        failures: List[FailedPair] = []
-        failure_counts: Dict[str, int] = {}
+        scores: list[float] = []
+        labels: list[int] = []
+        latencies: list[float] = []
+        failures: list[FailedPair] = []
+        failure_counts: dict[str, int] = {}
 
         for i, (path_a, path_b, is_same) in enumerate(pairs):
             start = time.perf_counter()
@@ -179,7 +177,7 @@ class BenchmarkHarness:
 
         # TAR@FAR at standard thresholds
         far_thresholds = [1e-1, 1e-2, 1e-3, 1e-4]
-        tar_at_far: Dict[str, float] = {}
+        tar_at_far: dict[str, float] = {}
         for far_t in far_thresholds:
             idx = np.searchsorted(fpr, far_t)
             if idx < len(tpr):
@@ -215,7 +213,7 @@ class BenchmarkHarness:
 
         return result
 
-    def _extract_embedding(self, image_path: str) -> Optional[np.ndarray]:
+    def _extract_embedding(self, image_path: str) -> np.ndarray | None:
         """Extract embedding from an image file."""
         if not os.path.exists(image_path):
             return None
@@ -238,8 +236,8 @@ class BenchmarkHarness:
 
     @staticmethod
     def _classify_failure(path_a: str, path_b: str,
-                          emb_a: Optional[np.ndarray],
-                          emb_b: Optional[np.ndarray]) -> str:
+                          emb_a: np.ndarray | None,
+                          emb_b: np.ndarray | None) -> str:
         """Classify why a pair failed embedding extraction."""
         reasons = []
         for path, emb in [(path_a, emb_a), (path_b, emb_b)]:
@@ -255,7 +253,7 @@ class BenchmarkHarness:
         return reasons[0] if reasons else "unknown"
 
     @staticmethod
-    def parse_lfw_pairs(pairs_file: str, lfw_dir: str) -> List[Tuple[str, str, int]]:
+    def parse_lfw_pairs(pairs_file: str, lfw_dir: str) -> list[tuple[str, str, int]]:
         """Parse LFW pairs.txt format.
 
         Format:
@@ -263,13 +261,13 @@ class BenchmarkHarness:
           Positive: name\ttab\timg1\timg2
           Negative: name1\ttab\timg1\tname2\timg2
         """
-        pairs: List[Tuple[str, str, int]] = []
+        pairs: list[tuple[str, str, int]] = []
 
         with open(pairs_file) as f:
             lines = f.readlines()
 
         # Line 1 contains fold info, e.g. "10 300"
-        n = int(lines[0].strip().split()[0])
+        int(lines[0].strip().split()[0])
 
         for line in lines[1:]:
             parts = line.strip().split("\t")
@@ -294,7 +292,7 @@ class BenchmarkHarness:
         return pairs
 
     @staticmethod
-    def format_report(results: List[BenchmarkResult]) -> str:
+    def format_report(results: list[BenchmarkResult]) -> str:
         """Format benchmark results as a human-readable report."""
         lines = [
             "=" * 70,
@@ -308,13 +306,13 @@ class BenchmarkHarness:
                 f"Dataset: {r.dataset}",
                 f"Model:   {r.model_version}",
                 f"Pairs:   {r.total_pairs} (of {r.total_pairs + len(r.failed_pairs)} total, {len(r.failed_pairs)} failed)",
-                f"",
+                "",
                 f"  Accuracy:   {r.accuracy:.4f} (threshold={r.threshold:.4f})",
                 f"  AUC:        {r.auc_score:.4f}",
                 f"  EER:        {r.eer:.4f}",
                 f"  Latency:    {r.latency_per_pair_ms:.1f} ms/pair",
-                f"",
-                f"  TAR@FAR:",
+                "",
+                "  TAR@FAR:",
             ])
 
             for far, tar in sorted(r.tar_at_far.items()):
@@ -330,7 +328,7 @@ class BenchmarkHarness:
         return "\n".join(lines)
 
     @staticmethod
-    def save_results(results: List[BenchmarkResult], path: str) -> None:
+    def save_results(results: list[BenchmarkResult], path: str) -> None:
         """Save results to JSON file."""
         data = []
         for r in results:
@@ -362,7 +360,7 @@ class BenchmarkHarness:
             json.dump(data, f, indent=2)
 
     @staticmethod
-    def parse_agedb_pairs(pairs_file: str, agedb_dir: str) -> List[Tuple[str, str, int]]:
+    def parse_agedb_pairs(pairs_file: str, agedb_dir: str) -> list[tuple[str, str, int]]:
         """Parse AgeDB-30 pairs file.
 
         Same tab-delimited format as LFW:
@@ -373,22 +371,22 @@ class BenchmarkHarness:
         return BenchmarkHarness._parse_lfw_style_pairs(pairs_file, agedb_dir)
 
     @staticmethod
-    def parse_cplfw_pairs(pairs_file: str, cplfw_dir: str) -> List[Tuple[str, str, int]]:
+    def parse_cplfw_pairs(pairs_file: str, cplfw_dir: str) -> list[tuple[str, str, int]]:
         """Parse CPLFW (Cross-Pose LFW) pairs file."""
         return BenchmarkHarness._parse_lfw_style_pairs(pairs_file, cplfw_dir)
 
     @staticmethod
-    def parse_cfp_fp_pairs(pairs_file: str, cfp_dir: str) -> List[Tuple[str, str, int]]:
+    def parse_cfp_fp_pairs(pairs_file: str, cfp_dir: str) -> list[tuple[str, str, int]]:
         """Parse CFP-FP (Frontal-Profile) pairs file."""
         return BenchmarkHarness._parse_lfw_style_pairs(pairs_file, cfp_dir)
 
     @staticmethod
-    def _parse_lfw_style_pairs(pairs_file: str, data_dir: str) -> List[Tuple[str, str, int]]:
+    def _parse_lfw_style_pairs(pairs_file: str, data_dir: str) -> list[tuple[str, str, int]]:
         """Generic parser for LFW-style tab-delimited pair files.
 
         Handles the standard format used by LFW, AgeDB-30, CPLFW, CFP-FP.
         """
-        pairs: List[Tuple[str, str, int]] = []
+        pairs: list[tuple[str, str, int]] = []
 
         with open(pairs_file) as f:
             lines = f.readlines()
@@ -430,8 +428,8 @@ class BenchmarkHarness:
 
     def evaluate_suite(
         self,
-        datasets: Dict[str, Tuple[str, str]],
-    ) -> List[BenchmarkResult]:
+        datasets: dict[str, tuple[str, str]],
+    ) -> list[BenchmarkResult]:
         """Run benchmarks across multiple datasets.
 
         Args:
@@ -440,7 +438,7 @@ class BenchmarkHarness:
         Returns:
             List of BenchmarkResult, one per dataset.
         """
-        results: List[BenchmarkResult] = []
+        results: list[BenchmarkResult] = []
 
         parser_map = {
             "LFW": self.parse_lfw_pairs,
@@ -468,8 +466,8 @@ class BenchmarkHarness:
         scores: np.ndarray,
         labels: np.ndarray,
         threshold: float,
-        quality_scores: Optional[np.ndarray] = None,
-    ) -> Dict[str, Dict[str, float]]:
+        quality_scores: np.ndarray | None = None,
+    ) -> dict[str, dict[str, float]]:
         """Compute FNMR broken down by quality tier.
 
         Buckets positive pairs into quality tiers and computes FNMR
@@ -508,7 +506,7 @@ class BenchmarkHarness:
                 }
             }
 
-        result: Dict[str, Dict[str, float]] = {}
+        result: dict[str, dict[str, float]] = {}
         for tier_name, (low, high) in tiers.items():
             tier_mask = (pos_qualities >= low) & (pos_qualities < high)
             tier_scores = pos_scores[tier_mask]
@@ -530,7 +528,7 @@ class BenchmarkHarness:
         return result
 
     @staticmethod
-    def format_suite_comparison(results: List[BenchmarkResult]) -> str:
+    def format_suite_comparison(results: list[BenchmarkResult]) -> str:
         """Format a cross-benchmark comparison table."""
         if not results:
             return "No results to compare."

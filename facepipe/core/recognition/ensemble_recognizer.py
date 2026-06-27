@@ -14,12 +14,11 @@ Fusion strategies:
 from __future__ import annotations
 
 import dataclasses
-from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
-from facepipe.config.settings import get_settings, EnsembleSettings
-from facepipe.core.recognition.adaface_recognizer import AdaFaceRecognizer, EmbeddingResult
+from facepipe.config.settings import EnsembleSettings, get_settings
+from facepipe.core.recognition.adaface_recognizer import AdaFaceRecognizer
 from facepipe.observability.logging import get_logger
 
 logger = get_logger(__name__)
@@ -35,10 +34,10 @@ class EnsembleEmbedding:
         model_used: Which model was used (for quality_gated strategy).
         quality_score: Quality score that influenced model selection.
     """
-    embeddings: Dict[str, np.ndarray]
+    embeddings: dict[str, np.ndarray]
     fused_embedding: np.ndarray
     model_used: str
-    quality_score: Optional[float]
+    quality_score: float | None
 
 
 class EnsembleRecognizer:
@@ -53,13 +52,13 @@ class EnsembleRecognizer:
 
     def __init__(
         self,
-        settings: Optional[EnsembleSettings] = None,
-        recognizers: Optional[Dict[str, AdaFaceRecognizer]] = None,
+        settings: EnsembleSettings | None = None,
+        recognizers: dict[str, AdaFaceRecognizer] | None = None,
     ) -> None:
         self._settings = settings or get_settings().ensemble
         self._recognizers = recognizers or {}
-        self._pca_matrix: Optional[np.ndarray] = None
-        self._pca_mean: Optional[np.ndarray] = None
+        self._pca_matrix: np.ndarray | None = None
+        self._pca_mean: np.ndarray | None = None
         self._pca_fitted = False
 
     def add_recognizer(self, name: str, recognizer: AdaFaceRecognizer) -> None:
@@ -75,7 +74,7 @@ class EnsembleRecognizer:
     def extract(
         self,
         aligned_face: np.ndarray,
-        quality_score: Optional[float] = None,
+        quality_score: float | None = None,
     ) -> EnsembleEmbedding:
         """Extract embeddings from all models and fuse.
 
@@ -92,7 +91,7 @@ class EnsembleRecognizer:
             return self._quality_gated_extract(aligned_face, quality_score)
 
         # Extract from all models
-        embeddings: Dict[str, np.ndarray] = {}
+        embeddings: dict[str, np.ndarray] = {}
         for name, recognizer in self._recognizers.items():
             result = recognizer.extract(aligned_face)
             embeddings[name] = result.embedding
@@ -119,7 +118,7 @@ class EnsembleRecognizer:
     def _quality_gated_extract(
         self,
         aligned_face: np.ndarray,
-        quality_score: Optional[float],
+        quality_score: float | None,
     ) -> EnsembleEmbedding:
         """Select model based on input quality.
 
@@ -153,7 +152,7 @@ class EnsembleRecognizer:
             quality_score=quality_score,
         )
 
-    def _concat_pca(self, embeddings: Dict[str, np.ndarray]) -> np.ndarray:
+    def _concat_pca(self, embeddings: dict[str, np.ndarray]) -> np.ndarray:
         """Concatenate embeddings from all models and apply PCA whitening.
 
         Without PCA whitening, the concatenated dimensions aren't equally
@@ -181,8 +180,8 @@ class EnsembleRecognizer:
 
     def fit_pca(
         self,
-        training_embeddings: Dict[str, List[np.ndarray]],
-        output_dim: Optional[int] = None,
+        training_embeddings: dict[str, list[np.ndarray]],
+        output_dim: int | None = None,
     ) -> None:
         """Fit PCA whitening on a set of training embeddings.
 
@@ -235,7 +234,7 @@ class EnsembleRecognizer:
 
     def score_level_fuse(
         self,
-        per_model_scores: Dict[str, float],
+        per_model_scores: dict[str, float],
     ) -> float:
         """Fuse scores from multiple models by averaging.
 
