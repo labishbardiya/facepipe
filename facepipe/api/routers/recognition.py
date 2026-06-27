@@ -54,10 +54,21 @@ async def recognize(
 
     # Build response
     face_results = []
+
+    # Get identity manager to look up names
+    from facepipe.api.dependencies import get_identity_manager
+    identity_mgr = get_identity_manager()
+
     for r in results:
+        identity_name = r.identity
+        if r.identity:
+            identity_record = identity_mgr.get(r.identity)
+            if identity_record:
+                identity_name = identity_record.name
+
         cs = r.decision.component_scores
         face_results.append(FaceResult(
-            identity=r.identity,
+            identity=identity_name,
             confidence=r.decision.confidence,
             is_recognized=r.decision.is_recognized,
             decision=r.decision.decision_reason,
