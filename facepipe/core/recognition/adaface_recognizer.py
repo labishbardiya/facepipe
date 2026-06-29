@@ -118,7 +118,10 @@ class AdaFaceRecognizer:
 
         providers = self._get_providers()
         self._insightface_app = FaceAnalysis(name="buffalo_l", providers=providers)
-        self._insightface_app.prepare(ctx_id=0, det_size=(640, 640))
+        self._insightface_app.prepare(
+            ctx_id=0 if "CUDAExecutionProvider" in providers else -1,
+            det_size=(640, 640),
+        )
         self._model_version = self.ARCFACE_VERSION
         self._use_adaface = False
         logger.info("arcface_fallback_loaded", providers=providers)

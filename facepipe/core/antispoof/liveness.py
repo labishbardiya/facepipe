@@ -190,15 +190,14 @@ class LivenessDetector:
         y, x = np.ogrid[:h, :w]
         dist = np.sqrt((x - center_x) ** 2 + (y - center_y) ** 2)
 
-        float(np.sum(magnitude[dist <= radius]))
+        low_freq_energy = float(np.sum(magnitude[dist <= radius]))
         high_freq_energy = float(np.sum(magnitude[dist > radius * 2]))
-        total_energy = float(np.sum(magnitude))
 
-        if total_energy < 1e-8:
+        if low_freq_energy < 1e-8:
             return 0.5
 
-        # Moiré patterns: anomalously high ratio of high-freq to total
-        high_freq_ratio = high_freq_energy / total_energy
+        # Moiré patterns: anomalously high ratio of high-freq to low-freq
+        high_freq_ratio = high_freq_energy / (low_freq_energy + high_freq_energy)
 
         # Live faces: high_freq_ratio typically < 0.15
         # Screen replay: high_freq_ratio typically > 0.25

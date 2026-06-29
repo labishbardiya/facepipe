@@ -165,6 +165,7 @@ class RecognitionPipeline:
         self,
         frame: np.ndarray,
         camera_id: str = "default",
+        mode: str = "video",
     ) -> list[RecognitionResult]:
         """Process a single video frame through the full pipeline.
 
@@ -282,7 +283,10 @@ class RecognitionPipeline:
                 openset = self._openset.analyze(search_results)
 
                 # 3i. Tracking consistency score
-                tracking_consistency = min(track.frames_tracked / 30.0, 1.0)
+                if mode == "photo":
+                    tracking_consistency = 1.0
+                else:
+                    tracking_consistency = min(track.frames_tracked / 30.0, 1.0)
 
                 # 3j. Decision fusion
                 decision = self._fusion.decide(

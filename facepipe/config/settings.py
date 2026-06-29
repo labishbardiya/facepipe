@@ -151,11 +151,11 @@ class FusionSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="FR_FUSION_")
 
     security_level: FusionSecurityLevel = Field(default=FusionSecurityLevel.STANDARD)
-    weight_recognition: float = Field(default=0.35)
+    weight_recognition: float = Field(default=0.45)
     weight_detection: float = Field(default=0.05)
     weight_quality: float = Field(default=0.10)
-    weight_liveness: float = Field(default=0.15)
-    weight_tracking: float = Field(default=0.10)
+    weight_liveness: float = Field(default=0.10)
+    weight_tracking: float = Field(default=0.05)
     weight_openset_margin: float = Field(default=0.15)
     weight_deepfake: float = Field(default=0.10)
 

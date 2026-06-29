@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
-@import "tailwindcss";
 
 @theme {
   --color-border: hsl(var(--border));
@@ -33,6 +32,8 @@
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
+  
+  --font-serif: var(--font-instrument-serif);
 }
 
 @layer base {
@@ -57,6 +58,7 @@
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
     --radius: 0.75rem;
+    --font-serif: var(--font-instrument-serif);
   }
 }
 

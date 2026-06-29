@@ -41,6 +41,7 @@ class EnrollResponse(BaseModel):
 class RecognizeRequest(BaseModel):
     """Recognition request with a single image."""
     image: str = Field(..., description="Base64-encoded JPEG/PNG image.")
+    mode: str = Field(default="photo", description="Mode of operation: 'photo' or 'video'.")
 
 class ComponentScores(BaseModel):
     recognition: float = 0.0

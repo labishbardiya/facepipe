@@ -58,7 +58,7 @@ class FAISSStore:
 
     def _create_index(self) -> faiss.Index:
         """Create a new FAISS HNSW index with ID mapping."""
-        hnsw = faiss.IndexHNSWFlat(self._dim, self._settings.m)
+        hnsw = faiss.IndexHNSWFlat(self._dim, self._settings.m, faiss.METRIC_INNER_PRODUCT)
         hnsw.hnsw.efConstruction = self._settings.ef_construction
         hnsw.hnsw.efSearch = self._settings.ef_search
 

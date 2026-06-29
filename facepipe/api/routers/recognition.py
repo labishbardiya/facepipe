@@ -48,7 +48,11 @@ async def recognize(
     start = time.perf_counter()
 
     # Run pipeline
-    results = pipeline.process_frame(frame)
+    results = pipeline.process_frame(
+        frame=frame,
+        camera_id="api_single_image",
+        mode=request.mode,
+    )
 
     total_latency = (time.perf_counter() - start) * 1000
 
